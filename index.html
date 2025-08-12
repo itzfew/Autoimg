@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Image Generator</title>
+    <title>Image URL Generator</title>
     <style>
         body {
             display: flex;
@@ -19,19 +19,6 @@
             border: 2px solid #333;
             margin-bottom: 20px;
         }
-        #downloadBtn {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-        }
-        #downloadBtn:hover {
-            background-color: #45a049;
-        }
         #error {
             color: red;
             margin-top: 10px;
@@ -39,8 +26,7 @@
     </style>
 </head>
 <body>
-    <canvas id="canvas" width="800" height="400"></canvas>
-    <a id="downloadBtn" style="display: none;" download="generated_image.png">Download Image</a>
+    <canvas id="canvas" width="800" height="400" style="display: none;"></canvas>
     <div id="error"></div>
 
     <script>
@@ -53,12 +39,11 @@
             };
         }
 
-        // Function to generate image on canvas
+        // Function to generate image and redirect to data URL
         function generateImage(text, design) {
             const canvas = document.getElementById('canvas');
             const ctx = canvas.getContext('2d');
             const errorDiv = document.getElementById('error');
-            const downloadBtn = document.getElementById('downloadBtn');
 
             // Clear canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -122,9 +107,9 @@
                 ctx.fillText(line, canvas.width / 2, startY + index * lineHeight);
             });
 
-            // Show download button and set download link
-            downloadBtn.style.display = 'block';
-            downloadBtn.href = canvas.toDataURL('image/png');
+            // Get data URL and redirect
+            const imageDataUrl = canvas.toDataURL('image/png');
+            window.location.href = imageDataUrl;
         }
 
         // Initialize on page load
