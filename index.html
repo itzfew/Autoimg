@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Image Generator</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        #canvas {
+            border: 2px solid #333;
+            margin-bottom: 20px;
+        }
+        #downloadBtn {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        #downloadBtn:hover {
+            background-color: #45a049;
+        }
+        #error {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="800" height="400"></canvas>
+    <a id="downloadBtn" style="display: none;" download="generated_image.png">Download Image</a>
+    <div id="error"></div>
+
+    <script>
+        // Function to get URL parameters
+        function getQueryParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                text: params.get('text') || 'Default Text',
+                designs: params.get('designs') || 'default'
+            };
+        }
+
+        // Function to generate image on canvas
+        function generateImage(text, design) {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            const errorDiv = document.getElementById('error');
+            const downloadBtn = document.getElementById('downloadBtn');
+
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Set background based on design parameter
+            let bgColor = '#ffffff';
+            let textColor = '#000000';
+            let fontStyle = '50px Arial';
+
+            if (design.toLowerCase() === 'dark') {
+                bgColor = '#333333';
+                textColor = '#ffffff';
+            } else if (design.toLowerCase() === 'blue') {
+                bgColor = '#007BFF';
+                textColor = '#ffffff';
+                fontStyle = '60px Verdana';
+            } else if (design.toLowerCase() === 'fancy') {
+                bgColor = '#FFD700';
+                textColor = '#FF4500';
+                fontStyle = '70px "Comic Sans MS"';
+            }
+
+            // Draw background
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw text
+            ctx.fillStyle = textColor;
+            ctx.font = fontStyle;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // Wrap text if too long
+            const maxWidth = canvas.width - 40;
+            const words = text.split(' ');
+            let line = '';
+            let lines = [];
+            const lineHeight = 60;
+
+            for (let i = 0; i < words.length; i++) {
+                const testLine = line + words[i] + ' ';
+                const metrics = ctx.measureText(testLine);
+                if (metrics.width > maxWidth && i > 0) {
+                    lines.push(line);
+                    line = words[i] + ' ';
+                } else {
+                    line = testLine;
+                }
+            }
+            lines.push(line);
+
+            // Display error if text is too long
+            if (lines.length > 3) {
+                errorDiv.textContent = 'Text is too long! Please use shorter text.';
+                return;
+            }
+
+            // Draw text lines
+            const startY = canvas.height / 2 - (lines.length - 1) * lineHeight / 2;
+            lines.forEach((line, index) => {
+                ctx.fillText(line, canvas.width / 2, startY + index * lineHeight);
+            });
+
+            // Show download button and set download link
+            downloadBtn.style.display = 'block';
+            downloadBtn.href = canvas.toDataURL('image/png');
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            const params = getQueryParams();
+            generateImage(params.text, params.designs);
+        };
+    </script>
+</body>
+</html>
