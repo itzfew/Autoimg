@@ -3,120 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image URL Generator</title>
+    <title>Google Sheets Input Form</title>
     <style>
         body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
             font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
         }
-        #canvas {
-            border: 2px solid #333;
-            margin-bottom: 20px;
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
         }
-        #error {
-            color: red;
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #357ae8;
+        }
+        #message {
             margin-top: 10px;
+            text-align: center;
+            color: #333;
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                padding: 15px;
+            }
         }
     </style>
 </head>
 <body>
-    <canvas id="canvas" width="800" height="400" style="display: none;"></canvas>
-    <div id="error"></div>
+    <div class="container">
+        <h1>Input to Google Sheets</h1>
+        <form id="inputForm">
+            <div class="form-group">
+                <label for="english">English</label>
+                <input type="text" id="english" name="english" required>
+            </div>
+            <div class="form-group">
+                <label for="kashmiri">Kashmiri</label>
+                <input type="text" id="kashmiri" name="kashmiri" required>
+            </div>
+            <div class="form-group">
+                <label for="synonymous">Synonymous</label>
+                <input type="text" id="synonymous" name="synonymous" required>
+            </div>
+            <div class="form-group">
+                <label for="otherMeaning">Other Meaning</label>
+                <input type="text" id="otherMeaning" name="otherMeaning" required>
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+        <div id="message"></div>
+    </div>
 
     <script>
-        // Function to get URL parameters
-        function getQueryParams() {
-            const params = new URLSearchParams(window.location.search);
-            return {
-                text: params.get('text') || 'Default Text',
-                designs: params.get('designs') || 'default'
+        document.getElementById('inputForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = 'Submitting...';
+
+            const formData = {
+                english: document.getElementById('english').value,
+                kashmiri: document.getElementById('kashmiri').value,
+                synonymous: document.getElementById('synonymous').value,
+                otherMeaning: document.getElementById('otherMeaning').value
             };
-        }
 
-        // Function to generate image and redirect to data URL
-        function generateImage(text, design) {
-            const canvas = document.getElementById('canvas');
-            const ctx = canvas.getContext('2d');
-            const errorDiv = document.getElementById('error');
+            try {
+                const response = await fetch('https://script.google.com/macros/s/AKfycbxJIQXhBr9bfa35Z94_kxt8j-K7gk95irPhbmAc-5273cQkx5v5oqEndzHWzcO1jdXJaQ/exec', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
 
-            // Clear canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Set background based on design parameter
-            let bgColor = '#ffffff';
-            let textColor = '#000000';
-            let fontStyle = '50px Arial';
-
-            if (design.toLowerCase() === 'dark') {
-                bgColor = '#333333';
-                textColor = '#ffffff';
-            } else if (design.toLowerCase() === 'blue') {
-                bgColor = '#007BFF';
-                textColor = '#ffffff';
-                fontStyle = '60px Verdana';
-            } else if (design.toLowerCase() === 'fancy') {
-                bgColor = '#FFD700';
-                textColor = '#FF4500';
-                fontStyle = '70px "Comic Sans MS"';
-            }
-
-            // Draw background
-            ctx.fillStyle = bgColor;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Draw text
-            ctx.fillStyle = textColor;
-            ctx.font = fontStyle;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-
-            // Wrap text if too long
-            const maxWidth = canvas.width - 40;
-            const words = text.split(' ');
-            let line = '';
-            let lines = [];
-            const lineHeight = 60;
-
-            for (let i = 0; i < words.length; i++) {
-                const testLine = line + words[i] + ' ';
-                const metrics = ctx.measureText(testLine);
-                if (metrics.width > maxWidth && i > 0) {
-                    lines.push(line);
-                    line = words[i] + ' ';
+                if (response.ok) {
+                    messageDiv.textContent = 'Data successfully saved to Google Sheets!';
+                    document.getElementById('inputForm').reset();
                 } else {
-                    line = testLine;
+                    messageDiv.textContent = 'Error saving data. Please try again.';
                 }
+            } catch (error) {
+                messageDiv.textContent = 'Error: ' + error.message;
             }
-            lines.push(line);
-
-            // Display error if text is too long
-            if (lines.length > 3) {
-                errorDiv.textContent = 'Text is too long! Please use shorter text.';
-                return;
-            }
-
-            // Draw text lines
-            const startY = canvas.height / 2 - (lines.length - 1) * lineHeight / 2;
-            lines.forEach((line, index) => {
-                ctx.fillText(line, canvas.width / 2, startY + index * lineHeight);
-            });
-
-            // Get data URL and redirect
-            const imageDataUrl = canvas.toDataURL('image/png');
-            window.location.href = imageDataUrl;
-        }
-
-        // Initialize on page load
-        window.onload = function() {
-            const params = getQueryParams();
-            generateImage(params.text, params.designs);
-        };
+        });
     </script>
 </body>
 </html>
