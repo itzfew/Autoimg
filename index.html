@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Exam System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <img src="assets/logo.png" alt="Logo" class="logo"> <!-- Optional logo -->
+            <span>Exam System</span>
+        </div>
+        <div class="nav-links" id="navLinks">
+            <a href="#" id="homeLink" class="hidden">Home</a>
+            <a href="#" id="resultsLink" class="hidden">Results</a>
+            <a href="#" id="myResultsLink" class="hidden">My Result</a>
+            <a href="#" id="paperLink" class="hidden">Paper</a>
+            <a href="#" id="certificateLink" class="hidden">Certificate</a>
+            <a href="#" id="attemptExamLink" class="hidden">Attempt Exam</a>
+        </div>
+        <div class="profile-container hidden" id="profileContainer">
+            <div class="profile-icon" id="profileIcon"></div>
+            <div class="profile-dropdown hidden" id="profileDropdown">
+                <div class="profile-info">
+                    <p id="profileName"></p>
+                    <p id="profileRoll"></p>
+                </div>
+                <button id="logoutBtn">Sign Out</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Registration -->
+        <div class="auth-box" id="registerBox">
+            <h2>Create Account</h2>
+            <input type="text" id="name" placeholder="Full Name" required>
+            <input type="text" id="username" placeholder="Username (no spaces)" required>
+            <input type="date" id="dob" required>
+            <button id="registerBtn">Create Account</button>
+            <p class="auth-switch">Already have an account? <a href="#" id="showLogin">Login</a></p>
+        </div>
+
+        <!-- Login -->
+        <div class="auth-box hidden" id="loginBox">
+            <h2>Login</h2>
+            <input type="text" id="loginUsername" placeholder="Username" required>
+            <input type="text" id="loginRoll" placeholder="Roll Number" required>
+            <button id="loginBtn">Login</button>
+            <p class="auth-switch">Don't have an account? <a href="#" id="showRegister">Register</a></p>
+        </div>
+
+        <!-- Home/Dashboard -->
+        <div class="dashboard hidden" id="dashboard">
+            <h2>Welcome, <span id="welcomeName"></span></h2>
+            <div class="dashboard-cards">
+                <div class="card" id="attemptCard">
+                    <h3>Seerat-e-Mustafa Exam</h3>
+                    <p>Attempt the exam to test your knowledge</p>
+                    <button id="attemptExamBtn">Attempt Exam</button>
+                </div>
+                <div class="card" id="resultCard">
+                    <h3>My Results</h3>
+                    <p>View your detailed results</p>
+                    <button id="viewResultsBtn">View Results</button>
+                </div>
+                <div class="card" id="certificateCard">
+                    <h3>Certificate</h3>
+                    <p>Download your certificate</p>
+                    <button id="downloadCertBtn">Download</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exam -->
+        <div class="exam-container hidden" id="examBox">
+            <h2 id="examTitle">Exam: Seerat-e-Mustafa</h2>
+            <div class="exam-info">
+                <p>Time: 30 minutes | Questions: <span id="totalQuestions">0</span></p>
+                <p id="timer">Time Left: 30:00</p>
+            </div>
+            <form id="examForm"></form>
+            <div class="exam-actions">
+                <button id="submitExamBtn">Submit Exam</button>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div class="result-container hidden" id="resultBox">
+            <h2>Your Result</h2>
+            <div class="result-summary">
+                <p id="resultText"></p>
+                <div class="result-details" id="resultDetails"></div>
+            </div>
+            <div class="result-actions">
+                <button id="downloadResultBtn">Download Detailed Result</button>
+                <button id="downloadCertBtn2">Download Certificate</button>
+                <button id="backToDashboardBtn">Back to Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/exam.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
