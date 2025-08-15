@@ -6,9 +6,8 @@
   <title>Exam System</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
   <style>
+    /* Your existing CSS remains unchanged */
     :root {
       --primary: #4361ee;
       --primary-dark: #3a56d4;
@@ -409,7 +408,6 @@
       }
     }
   </style>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
 
@@ -488,6 +486,7 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycby9u8GQS-T7rYVJjpJDsxWX1LQbYbktWWReZGVKtPvFS0tKBAhuGN_959rt8SKhNl15-A/exec";
 const { jsPDF } = window.jspdf;
@@ -729,21 +728,22 @@ function downloadAllResults(){
     // Add table
     doc.setFontSize(10);
     doc.setTextColor(0, 0, 0);
-doc.autoTable({
-  startY: 30,
-  head: headers,
-  body: rows,
-  theme: 'grid',
-  headStyles: {
-    fillColor: [67, 97, 238],
-    textColor: [255, 255, 255],
-    fontStyle: 'bold'
-  },
-  alternateRowStyles: {
-    fillColor: [240, 240, 255]
-  },
-  margin: { top: 30 }
-});
+    doc.autoTable({
+      startY: 30,
+      head: headers,
+      body: rows,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [67, 97, 238],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold'
+      },
+      alternateRowStyles: {
+        fillColor: [240, 240, 255]
+      },
+      margin: { top: 30 }
+    });
+    
     // Add footer
     doc.setFontSize(8);
     doc.setTextColor(150, 150, 150);
@@ -763,6 +763,12 @@ doc.autoTable({
 function downloadMyResults(){
   showProgress('Generating Your Detailed Results...');
   const user = JSON.parse(localStorage.getItem("user"));
+  
+  if (!user || !user.rollNumber) {
+    hideProgress();
+    showAlert('User not logged in. Please log in again.', 'danger');
+    return;
+  }
   
   fetch(API_URL, { 
     method: "POST", 
@@ -796,7 +802,7 @@ function downloadMyResults(){
     // Add results summary
     let totalQuestions = data.length;
     let correctAnswers = data.filter(q => q.answer === q.correctAnswer).length;
-    let scorePercentage = Math.round((correctAnswers / totalQuestions) * 100);
+    let scorePercentage = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
     
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
@@ -819,17 +825,17 @@ function downloadMyResults(){
       }
       
       doc.setTextColor(0, 0, 0);
-      doc.setFontStyle('bold');
-      doc.text(`${i+1}. ${q.question}`, 20, y);
+      doc.setFont("helvetica", "bold");
+      doc.text(`${i+1}. ${q.question}`, 20, y, { maxWidth: 170 });
       y += 7;
       
-      doc.setFontStyle('normal');
+      doc.setFont("helvetica", "normal");
       doc.setTextColor(q.answer === q.correctAnswer ? [0, 150, 0] : [150, 0, 0]);
-      doc.text(`Your Answer: ${q.answer}`, 25, y);
+      doc.text(`Your Answer: ${q.answer}`, 25, y, { maxWidth: 165 });
       y += 7;
       
       doc.setTextColor(0, 150, 0);
-      doc.text(`Correct Answer: ${q.correctAnswer}`, 25, y);
+      doc.text(`Correct Answer: ${q.correctAnswer}`, 25, y, { maxWidth: 165 });
       y += 10;
     });
     
@@ -852,6 +858,12 @@ function downloadMyResults(){
 function downloadCertificate(){
   showProgress('Generating Your Certificate...');
   const user = JSON.parse(localStorage.getItem("user"));
+  
+  if (!user || !user.rollNumber) {
+    hideProgress();
+    showAlert('User not logged in. Please log in again.', 'danger');
+    return;
+  }
   
   fetch(API_URL, { 
     method: "POST", 
@@ -886,20 +898,22 @@ function downloadCertificate(){
     // Add title
     doc.setFontSize(36);
     doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
     doc.text("CERTIFICATE OF ACHIEVEMENT", 148.5, 50, null, null, 'center');
     
     // Add subtitle
     doc.setFontSize(18);
+    doc.setFont("helvetica", "normal");
     doc.text("This Certificate is Proudly Presented to", 148.5, 70, null, null, 'center');
     
     // Add name
     doc.setFontSize(28);
-    doc.setFontStyle('bold');
+    doc.setFont("helvetica", "bold");
     doc.text(user.name.toUpperCase(), 148.5, 90, null, null, 'center');
     
     // Add achievement text
     doc.setFontSize(16);
-    doc.setFontStyle('normal');
+    doc.setFont("helvetica", "normal");
     doc.text(`For successfully completing the examination with a score of ${res.marks}/${res.totalMarks}`, 148.5, 110, null, null, 'center');
     
     // Add date
@@ -910,6 +924,7 @@ function downloadCertificate(){
     doc.circle(148.5, 160, 20, 'F');
     doc.setFontSize(12);
     doc.setTextColor(67, 97, 238);
+    doc.setFont("helvetica", "normal");
     doc.text("ExamPro", 148.5, 155, null, null, 'center');
     doc.setFontSize(8);
     doc.text("Official Seal", 148.5, 160, null, null, 'center');
@@ -932,7 +947,10 @@ function downloadCertificate(){
 // Render Home
 function renderHome(){
   const user = JSON.parse(localStorage.getItem("user"));
-  if(!user) return;
+  if(!user) {
+    showAlert('No user data found. Please log in.', 'danger');
+    return;
+  }
   
   // Hide auth box and show home view with animation
   document.getElementById('authBox').classList.remove('visible');
