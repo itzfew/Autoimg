@@ -44,7 +44,7 @@ function updateNavLinks() {
         document.getElementById("myResultsLink").classList.remove("hidden");
         
         // Check if user has attempted the exam
-        fetch(https://script.google.com/macros/s/AKfycbwysUniRPzoa8Y4SFKzw_ihh_Rx4y8fQL5hjxRjAAQmovO_SR1xxZwtimKYvw-89DRHvA/exec, {
+        fetch(APP_URL, {
             method: "POST",
             body: JSON.stringify({ 
                 action: "checkAttempt", 
@@ -115,7 +115,7 @@ function registerUser() {
     
     const rollNumber = generateRollNumber();
     
-    fetch(https://script.google.com/macros/s/AKfycbwysUniRPzoa8Y4SFKzw_ihh_Rx4y8fQL5hjxRjAAQmovO_SR1xxZwtimKYvw-89DRHvA/exec, {
+    fetch(APP_URL, {
         method: "POST",
         headers: {
             'Content-Type': 'application/json'
@@ -164,7 +164,7 @@ function loginUser() {
         return;
     }
     
-    fetch(https://script.google.com/macros/s/AKfycbwysUniRPzoa8Y4SFKzw_ihh_Rx4y8fQL5hjxRjAAQmovO_SR1xxZwtimKYvw-89DRHvA/exec, {
+    fetch(APP_URL, {
         method: "POST",
         headers: {
             'Content-Type': 'application/json'
