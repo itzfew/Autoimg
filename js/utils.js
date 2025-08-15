@@ -1,5 +1,5 @@
 // Utility functions
-const APP_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL"; // Replace with your deployed Google Apps Script Web App URL
+const APP_URL = "https://script.google.com/macros/s/AKfycbwysUniRPzoa8Y4SFKzw_ihh_Rx4y8fQL5hjxRjAAQmovO_SR1xxZwtimKYvw-89DRHvA/exec"; // Replace with your deployed Google Apps Script Web App URL
 const QUIZ_ID = 'hdjsk299e93uee'; // Hardcoded quiz ID for Seerat-e-Mustafa
 const QUIZ_JSON_URL = `quizes/${QUIZ_ID}.json`; // Path to your quiz JSON file
 
