@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Exam</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+    .question { background: white; padding: 15px; margin-bottom: 10px; border-radius: 6px; }
+    button { padding: 10px 15px; background: #4CAF50; color: white; border: none; cursor: pointer; }
+    button:hover { background: #45a049; }
+  </style>
+</head>
+<body>
+<h1>Exam</h1>
+<div id="examContainer"></div>
+<button onclick="submitExam()">Submit</button>
+
+<script>
+const API_URL = "YOUR_DEPLOYED_WEB_APP_URL";
+const user = JSON.parse(localStorage.getItem("user"));
+if(!user) window.location.href = "index.html";
+
+// Questions
+const questions = [
+  { q: "2+2=?", options: ["3","4","5"], correct: "4" },
+  { q: "Capital of France?", options: ["Paris","Rome","Berlin"], correct: "Paris" }
+];
+
+const examContainer = document.getElementById("examContainer");
+questions.forEach((ques, i)=>{
+  examContainer.innerHTML += `
+    <div class="question">
+      <p>${i+1}. ${ques.q}</p>
+      ${ques.options.map(opt=>`<label><input type="radio" name="q${i}" value="${opt}"> ${opt}</label>`).join('<br>')}
+    </div>
+  `;
+});
+
+function submitExam(){
+  let score = 0;
+  let details = [];
+  questions.forEach((ques,i)=>{
+    let ans = document.querySelector(`input[name=q${i}]:checked`)?.value || "";
+    let correct = ques.correct;
+    let isCorrect = ans === correct;
+    if(isCorrect) score++;
+    details.push({ question: ques.q, answer: ans, correctAnswer: correct, isCorrect });
+  });
+  fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "saveResult", quizId: "Quiz1", rollNumber: user.rollNumber, name: user.name, username: user.username, marks: score, totalMarks: questions.length, details })
+  }).then(r=>r.json()).then(res=>{
+    if(res.success) {
+      alert("Exam submitted! You scored " + score + "/" + questions.length);
+      window.location.href = "index.html";
+    }
+  });
+}
+</script>
+</body>
+</html>
