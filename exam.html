@@ -1,197 +1,878 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Exam</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ExamPro - Exam</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
-    body { font-family: Arial; padding: 20px; background: #f5f5f5; }
-    .question { background: white; padding: 15px; margin-bottom: 10px; border-radius: 6px; }
-    .missed { background: #ffe0e0; }
-    button { padding: 10px 15px; background: #4CAF50; color: white; border: none; cursor: pointer; margin-top: 10px; }
-    button:hover { background: #45a049; }
-    #progressModal { display:none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.4); justify-content:center; align-items:center; }
-    .progressBox { background:white; padding:20px; border-radius:8px; text-align:center; width:300px; }
-    .progressBar { width:100%; background:#ddd; height:20px; border-radius:10px; overflow:hidden; }
-    .progressFill { height:100%; width:0; background:#4CAF50; transition: width 0.2s; }
-    .nav { margin-top: 20px; }
-    .nav a { margin-right: 15px; cursor: pointer; color: #333; font-weight:bold; text-decoration:none; }
-    .nav a:hover { color: #4CAF50; }
+    :root {
+      --primary: #4361ee;
+      --primary-dark: #3a56d4;
+      --secondary: #3f37c9;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --success: #4cc9f0;
+      --danger: #f72585;
+      --warning: #f8961e;
+      --info: #4895ef;
+      --border-radius: 12px;
+      --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f5f7ff;
+      color: var(--dark);
+      line-height: 1.6;
+    }
+    
+    header {
+      background: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--box-shadow);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      transform: translateY(-100%);
+      opacity: 0;
+      transition: var(--transition);
+    }
+    
+    header.visible {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+    }
+    
+    .logo i {
+      margin-right: 0.5rem;
+      font-size: 1.8rem;
+    }
+    
+    nav {
+      display: flex;
+      align-items: center;
+    }
+    
+    nav a {
+      margin: 0 1rem;
+      text-decoration: none;
+      color: var(--dark);
+      font-weight: 500;
+      position: relative;
+      padding: 0.5rem 0;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+    
+    nav a:hover {
+      color: var(--primary);
+    }
+    
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--primary);
+      transition: var(--transition);
+    }
+    
+    nav a:hover::after {
+      width: 100%;
+    }
+    
+    .profile {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+    }
+    
+    .profile:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(67, 97, 238, 0.4);
+    }
+    
+    .container {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-top: 6rem;
+    }
+    
+    .box {
+      background: white;
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      margin-bottom: 2rem;
+      transform: translateY(20px);
+      opacity: 0;
+      transition: var(--transition);
+    }
+    
+    .box.visible {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    .box h2 {
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+      text-align: center;
+    }
+    
+    .question {
+      background: white;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      transition: var(--transition);
+    }
+    
+    .question.missed {
+      background: rgba(247, 37, 133, 0.1);
+      border-left: 4px solid var(--danger);
+    }
+    
+    .question p {
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      color: var(--dark);
+    }
+    
+    .question label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+      color: #666;
+      cursor: pointer;
+    }
+    
+    .question input[type="radio"] {
+      margin-right: 0.5rem;
+    }
+    
+    .btn {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: var(--border-radius);
+      font-family: 'Poppins', sans-serif;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      text-align: center;
+      margin: 0.5rem;
+    }
+    
+    .btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+    }
+    
+    .btn-outline {
+      background: transparent;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+    
+    .btn-outline:hover {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .alert {
+      padding: 1rem;
+      border-radius: var(--border-radius);
+      margin-bottom: 1rem;
+      display: none;
+      background: rgba(76, 201, 240, 0.2);
+      border-left: 4px solid var(--success);
+      color: #0a6d8c;
+    }
+    
+    .alert-danger {
+      background: rgba(247, 37, 133, 0.2);
+      border-left: 4px solid var(--danger);
+      color: #8c0a4b;
+    }
+    
+    /* Progress Modal */
+    #progressModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(5px);
+    }
+    
+    .progressBox {
+      background: white;
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      text-align: center;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      transform: scale(0.9);
+      opacity: 0;
+      transition: var(--transition);
+    }
+    
+    .progressBox.visible {
+      transform: scale(1);
+      opacity: 1;
+    }
+    
+    .progressBox h3 {
+      margin-bottom: 1.5rem;
+      color: var(--primary);
+    }
+    
+    .progressBar {
+      width: 100%;
+      background: #f0f0f0;
+      height: 10px;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+    
+    .progressFill {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--primary), var(--success));
+      transition: width 0.3s ease;
+    }
+    
+    .progressText {
+      font-weight: 500;
+      color: var(--dark);
+    }
+    
+    /* Confirmation Modal */
+    #confirmModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(5px);
+    }
+    
+    .confirmBox {
+      background: white;
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      text-align: center;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      transform: scale(0.9);
+      opacity: 0;
+      transition: var(--transition);
+    }
+    
+    .confirmBox.visible {
+      transform: scale(1);
+      opacity: 1;
+    }
+    
+    .confirmBox h3 {
+      margin-bottom: 1.5rem;
+      color: var(--primary);
+    }
+    
+    .confirmBox p {
+      margin-bottom: 1.5rem;
+      color: #666;
+    }
+    
+    .confirmBox a {
+      color: var(--danger);
+      text-decoration: underline;
+      cursor: pointer;
+      margin: 0 0.2rem;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease forwards;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      header {
+        padding: 1rem;
+      }
+      
+      nav a {
+        margin: 0 0.5rem;
+        font-size: 0.9rem;
+      }
+      
+      .container {
+        padding: 1rem;
+        padding-top: 5rem;
+      }
+      
+      .box {
+        padding: 1.5rem;
+      }
+    }
   </style>
 </head>
 <body>
-<div id="progressModal">
-  <div class="progressBox">
-    <h3>Processing...</h3>
-    <div class="progressBar"><div id="progressFill" class="progressFill"></div></div>
-    <p id="progressText">0%</p>
+  <header id="topBar">
+    <div class="logo">
+      <i class="fas fa-graduation-cap"></i>
+      <span>ExamPro</span>
+    </div>
+    <nav id="navLinks"></nav>
+    <div class="profile" id="profilePic" title="Profile"></div>
+  </header>
+
+  <div class="container" id="mainContent">
+    <div class="box" id="examBox">
+      <h2 id="title">Exam</h2>
+      <div id="alertBox" class="alert" style="display: none;"></div>
+      <div id="content"></div>
+    </div>
   </div>
-</div>
 
-<h1 id="title">Exam</h1>
-<div id="content"></div>
+  <!-- Progress Modal -->
+  <div id="progressModal">
+    <div class="progressBox">
+      <h3 id="progressTitle">Processing...</h3>
+      <div class="progressBar">
+        <div class="progressFill" id="progressFill"></div>
+      </div>
+      <p class="progressText" id="progressText">0%</p>
+    </div>
+  </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script>
-const API_URL = "https://script.google.com/macros/s/AKfycbx-HPTKFkmhd2gJXgd9JFTjcgamCumgLbOseFp0ZLR7EFC-65v7oSIybsEZYnYvnFXHww/exec";
-const { jsPDF } = window.jspdf;
+  <!-- Confirmation Modal -->
+  <div id="confirmModal">
+    <div class="confirmBox">
+      <h3>Confirm Submission</h3>
+      <p id="confirmMessage">Are you sure you want to submit? This action is not reversible.</p>
+      <div id="missedQuestions"></div>
+      <button class="btn" onclick="submitExam()">Submit</button>
+      <button class="btn btn-outline" onclick="cancelSubmit()">Cancel</button>
+    </div>
+  </div>
 
-function showProgress() {
-  document.getElementById("progressModal").style.display = "flex";
-  let progress = 0;
-  document.getElementById("progressFill").style.width = "0%";
-  document.getElementById("progressText").innerText = "0%";
-  window.prog = setInterval(()=>{
-    if (progress < 95) {
-      progress += 5;
-      document.getElementById("progressFill").style.width = progress + "%";
-      document.getElementById("progressText").innerText = progress + "%";
-    } else clearInterval(prog);
-  }, 100);
-}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycby9u8GQS-T7rYVJjpJDsxWX1LQbYbktWWReZGVKtPvFS0tKBAhuGN_959rt8SKhNl15-A/exec";
+    const { jsPDF } = window.jspdf;
+    let questionsData = []; // Store questions globally for submission
 
-function hideProgress() {
-  clearInterval(window.prog);
-  document.getElementById("progressFill").style.width = "100%";
-  document.getElementById("progressText").innerText = "100%";
-  setTimeout(() => document.getElementById("progressModal").style.display = "none", 300);
-}
+    // Initialize the app
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(() => {
+        document.getElementById('examBox').classList.add('visible');
+        document.getElementById('topBar').classList.add('visible');
+      }, 100);
+      loadPage();
+    });
 
-function scrollToQ(i){
-  document.getElementById(`q${i}`).scrollIntoView({ behavior: "smooth" });
-}
+    // Show alert message
+    function showAlert(message, type = 'success') {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.textContent = message;
+      alertBox.className = `alert alert-${type}`;
+      alertBox.style.display = 'block';
+      setTimeout(() => {
+        alertBox.style.display = 'none';
+      }, 5000);
+    }
 
-function renderExam(questions) {
-  const c = document.getElementById("content");
-  c.innerHTML = "";
-  questions.forEach((ques, idx) => {
-    const div = document.createElement("div");
-    div.id = `q${idx}`;
-    div.className = "question";
-    div.innerHTML = `<p>${idx+1}. ${ques.q}</p>` +
-      ques.options.map(opt => `<label><input type="radio" name="q${idx}" value="${opt}"> ${opt}</label>`).join("<br>");
-    c.appendChild(div);
-  });
-  const btn = document.createElement("button");
-  btn.textContent = "Submit Exam";
-  btn.onclick = () => confirmSubmit(questions);
-  c.appendChild(btn);
-}
+    // Progress Modal
+    function showProgress(title = 'Processing...') {
+      document.getElementById("progressTitle").textContent = title;
+      document.getElementById("progressModal").style.display = "flex";
+      document.getElementById("progressFill").style.width = "0%";
+      document.getElementById("progressText").textContent = "0%";
+      setTimeout(() => {
+        document.querySelector('.progressBox').classList.add('visible');
+      }, 10);
+      let progress = 0;
+      window.prog = setInterval(() => {
+        if (progress < 50) {
+          progress += 5;
+          document.getElementById("progressFill").style.width = progress + "%";
+          document.getElementById("progressText").textContent = progress + "%";
+        } else {
+          clearInterval(window.prog);
+        }
+      }, 200);
+    }
 
-function confirmSubmit(questions) {
-  const missed = [];
-  questions.forEach((ques, i) => {
-    const sel = document.querySelector(`input[name=q${i}]:checked`);
-    if (!sel || sel.value.trim()==="") missed.push(i);
-  });
-  let msg = "Are you sure to submit? It is not reversible.";
-  if (missed.length > 0) {
-    msg += "\n\nYou missed questions: " + missed.map(i => `<a onclick="scrollToQ(${i})">#${i+1}</a>`).join(", ");
-  }
-  if (confirm(msg.replace(/<\/?a>/g,""))) submitExam(questions);
-}
+    function hideProgress() {
+      clearInterval(window.prog);
+      document.getElementById("progressFill").style.width = "100%";
+      document.getElementById("progressText").textContent = "100%";
+      setTimeout(() => {
+        document.querySelector('.progressBox').classList.remove('visible');
+        setTimeout(() => {
+          document.getElementById("progressModal").style.display = "none";
+        }, 300);
+      }, 500);
+    }
 
-function submitExam(questions) {
-  showProgress();
-  const user = JSON.parse(localStorage.getItem("user"));
-  let score = 0, details = [];
-  questions.forEach((q, i) => {
-    const ans = document.querySelector(`input[name=q${i}]:checked`)?.value || "";
-    const correct = q.correct;
-    const isCorrect = ans === correct;
-    if (isCorrect) score++;
-    details.push({ question: q.q, answer: ans, correctAnswer: correct, isCorrect });
-  });
-  fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify({
-      action: "saveResult", quizId: "Exam1",
-      rollNumber: user.rollNumber, name: user.name,
-      username: user.username,
-      marks: score, totalMarks: questions.length, details
-    })
-  }).then(r=>r.json()).then(res => {
-    hideProgress();
-    alert(`Submitted! You scored ${score}/${questions.length}`);
-    loadPage();
-  });
-}
+    // Scroll to question
+    function scrollToQ(i) {
+      document.getElementById(`q${i}`).scrollIntoView({ behavior: "smooth" });
+      cancelSubmit(); // Close confirmation modal
+    }
 
-function downloadPDF(detailed, title, filename) {
-  showProgress();
-  const doc = new jsPDF();
-  doc.text(title, 10, 10);
-  let y = 20;
-  detailed.forEach((q,i) => {
-    doc.text(`${i+1}. ${q.question}`, 10, y); y += 6;
-    doc.text(`Your: ${q.answer}`, 12, y); y += 6;
-    doc.text(`Correct: ${q.correctAnswer}`, 12, y); y += 8;
-  });
-  hideProgress();
-  doc.save(filename);
-}
+    // Render exam questions
+    function renderExam(questions) {
+      questionsData = questions; // Store questions for submission
+      const content = document.getElementById("content");
+      content.innerHTML = "";
+      questions.forEach((ques, idx) => {
+        const div = document.createElement("div");
+        div.id = `q${idx}`;
+        div.className = "question";
+        div.innerHTML = `
+          <p><strong>${idx + 1}. ${ques.q}</strong></p>
+          ${ques.options.map(opt => `
+            <label>
+              <input type="radio" name="q${idx}" value="${opt}" aria-label="Option ${opt} for question ${idx + 1}">
+              ${opt}
+            </label>
+          `).join("<br>")}
+        `;
+        content.appendChild(div);
+      });
+      const btn = document.createElement("button");
+      btn.className = "btn";
+      btn.textContent = "Submit Exam";
+      btn.onclick = () => confirmSubmit();
+      content.appendChild(btn);
+    }
 
-function loadPage() {
-  const user = JSON.parse(localStorage.getItem("user"));
-  if (!user) return window.location.href = "index.html";
-  showProgress();
-  fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify({ action: "checkAttempt", rollNumber: user.rollNumber })
-  }).then(r=>r.json()).then(res => {
-    hideProgress();
-    if (res.attempted) {
-      // fetch details
+    // Confirm submission
+    function confirmSubmit() {
+      const missed = [];
+      questionsData.forEach((ques, i) => {
+        const sel = document.querySelector(`input[name=q${i}]:checked`);
+        if (!sel || sel.value.trim() === "") missed.push(i);
+      });
+      const confirmModal = document.getElementById("confirmModal");
+      const confirmMessage = document.getElementById("confirmMessage");
+      const missedQuestions = document.getElementById("missedQuestions");
+      
+      // Highlight missed questions
+      questionsData.forEach((_, i) => {
+        const qDiv = document.getElementById(`q${i}`);
+        if (missed.includes(i)) {
+          qDiv.classList.add("missed");
+        } else {
+          qDiv.classList.remove("missed");
+        }
+      });
+
+      confirmMessage.innerHTML = "Are you sure you want to submit? This action is not reversible.";
+      if (missed.length > 0) {
+        missedQuestions.innerHTML = `
+          <p style="color: var(--danger);">
+            You missed questions: 
+            ${missed.map(i => `<a onclick="scrollToQ(${i})" role="button" aria-label="Go to question ${i + 1}">#${i + 1}</a>`).join(", ")}
+          </p>
+        `;
+      } else {
+        missedQuestions.innerHTML = "";
+      }
+      
+      confirmModal.style.display = "flex";
+      setTimeout(() => {
+        document.querySelector('.confirmBox').classList.add('visible');
+      }, 10);
+    }
+
+    // Cancel submission
+    function cancelSubmit() {
+      const confirmModal = document.getElementById("confirmModal");
+      document.querySelector('.confirmBox').classList.remove('visible');
+      setTimeout(() => {
+        confirmModal.style.display = "none";
+      }, 300);
+    }
+
+    // Submit exam
+    function submitExam() {
+      showProgress("Submitting Exam...");
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user || !user.rollNumber) {
+        hideProgress();
+        showAlert("User not logged in. Redirecting to login.", "danger");
+        setTimeout(() => window.location.href = "index.html", 2000);
+        return;
+      }
+      let score = 0, details = [];
+      questionsData.forEach((q, i) => {
+        const ans = document.querySelector(`input[name=q${i}]:checked`)?.value || "";
+        const correct = q.correct;
+        const isCorrect = ans === correct;
+        if (isCorrect) score++;
+        details.push({ question: q.q, answer: ans, correctAnswer: correct, isCorrect });
+      });
       fetch(API_URL, {
         method: "POST",
-        body: JSON.stringify({ action: "getMyResults", rollNumber: user.rollNumber })
-      }).then(r=>r.json()).then(data => {
-        const c = document.getElementById("content");
-        c.innerHTML = `<h2>Your Detailed Results</h2>`;
-        data.forEach((q,i) => {
-          c.innerHTML += `<div class="question">
-            <p>${i+1}. ${q.question}</p>
-            <p>Your: ${q.answer}</p>
-            <p>Correct: ${q.correctAnswer}</p>
-          </div>`;
-        });
-        // add PDF and Certificate buttons
-        const nav = document.createElement("div"); nav.className="nav";
-        nav.innerHTML = `
-          <a onclick="downloadPDF(${JSON.stringify(data)}, 'Your Detailed Results', 'My_Result.pdf')">Download PDF</a>
-          <a onclick="downloadCertificate()">Download Certificate</a>
-        `;
-        c.appendChild(nav);
+        body: JSON.stringify({
+          action: "saveResult",
+          quizId: "Exam1",
+          rollNumber: user.rollNumber,
+          name: user.name,
+          username: user.username,
+          marks: score,
+          totalMarks: questionsData.length,
+          details
+        })
+      })
+      .then(r => {
+        if (!r.ok) throw new Error("Network response was not ok");
+        return r.json();
+      })
+      .then(res => {
+        hideProgress();
+        showAlert(`Submitted! You scored ${score}/${questionsData.length}`, "success");
+        setTimeout(() => loadPage(), 1500);
+      })
+      .catch(error => {
+        hideProgress();
+        showAlert("Failed to submit exam. Please try again.", "danger");
+        console.error("Error:", error);
       });
-    } else {
-      // show exam
-      const sampleQs = [
-        { q:"2+2=?", options:["3","4","5"], correct:"4" },
-        { q:"Capital of France?", options:["Paris","Rome","Berlin"], correct:"Paris" },
-        { q:"5 - 2 = ?", options:["2","3","4"], correct:"3" }
-      ];
-      renderExam(sampleQs);
     }
-  });
-}
 
-function downloadCertificate(){
-  const user = JSON.parse(localStorage.getItem("user"));
-  showProgress();
-  fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify({ action: "getUserScore", rollNumber: user.rollNumber })
-  }).then(r=>r.json()).then(res => {
-    const doc = new jsPDF({ orientation: 'landscape' });
-    doc.setFontSize(30); doc.text("Certificate of Achievement", 50, 50);
-    doc.setFontSize(24); doc.text(user.name, 50, 90);
-    doc.setFontSize(16);
-    doc.text(`Score: ${res.marks}/${res.totalMarks}`, 50, 110);
-    doc.text(`Date: ${new Date().toLocaleDateString()}`, 50, 130);
-    hideProgress();
-    doc.save("Certificate.pdf");
-  });
-}
+    // Download PDF
+    function downloadPDF(detailed, title, filename) {
+      showProgress("Generating PDF...");
+      const doc = new jsPDF();
+      const user = JSON.parse(localStorage.getItem("user"));
+      
+      // Add title
+      doc.setFontSize(20);
+      doc.setTextColor(67, 97, 238);
+      doc.text(title, 105, 15, null, null, "center");
+      
+      // Add subtitle
+      doc.setFontSize(12);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Roll Number: ${user.rollNumber} | Date: ${new Date().toLocaleDateString()}`, 105, 22, null, null, "center");
+      
+      // Add line
+      doc.setDrawColor(67, 97, 238);
+      doc.setLineWidth(0.5);
+      doc.line(20, 25, 190, 25);
+      
+      // Add results summary
+      let totalQuestions = detailed.length;
+      let correctAnswers = detailed.filter(q => q.isCorrect).length;
+      let scorePercentage = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+      
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
+      doc.text(`Total Questions: ${totalQuestions}`, 20, 35);
+      doc.text(`Correct Answers: ${correctAnswers}`, 20, 42);
+      doc.text(`Score: ${scorePercentage}%`, 20, 49);
+      
+      // Add detailed questions
+      let y = 60;
+      doc.setFontSize(14);
+      doc.setTextColor(67, 97, 238);
+      doc.text("Detailed Results:", 20, y);
+      y += 10;
+      
+      doc.setFontSize(10);
+      detailed.forEach((q, i) => {
+        if (y > 260) {
+          doc.addPage();
+          y = 20;
+        }
+        doc.setTextColor(0, 0, 0);
+        doc.setFont("helvetica", "bold");
+        doc.text(`${i + 1}. ${q.question}`, 20, y, { maxWidth: 170 });
+        y += 7;
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(q.isCorrect ? [0, 150, 0] : [150, 0, 0]);
+        doc.text(`Your Answer: ${q.answer || "Not answered"}`, 25, y, { maxWidth: 165 });
+        y += 7;
+        doc.setTextColor(0, 150, 0);
+        doc.text(`Correct Answer: ${q.correctAnswer}`, 25, y, { maxWidth: 165 });
+        y += 10;
+      });
+      
+      // Add footer
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text("© ExamPro - Confidential Report", 105, 285, null, null, "center");
+      
+      hideProgress();
+      doc.save(filename);
+    }
 
-window.onload = loadPage;
-</script>
+    // Download Certificate
+    function downloadCertificate() {
+      showProgress("Generating Your Certificate...");
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user || !user.rollNumber) {
+        hideProgress();
+        showAlert("User not logged in. Redirecting to login.", "danger");
+        setTimeout(() => window.location.href = "index.html", 2000);
+        return;
+      }
+      fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "getUserScore", rollNumber: user.rollNumber })
+      })
+      .then(r => {
+        if (!r.ok) throw new Error("Network response was not ok");
+        return r.json();
+      })
+      .then(res => {
+        const doc = new jsPDF({ orientation: "landscape", unit: "mm" });
+        // Add background
+        doc.setFillColor(245, 247, 255);
+        doc.rect(0, 0, 297, 210, "F");
+        // Add border
+        doc.setDrawColor(67, 97, 238);
+        doc.setLineWidth(1);
+        doc.rect(10, 10, 277, 190);
+        // Add decorative elements
+        doc.setFillColor(67, 97, 238);
+        doc.roundedRect(20, 20, 257, 170, 5, 5, "F");
+        // Add title
+        doc.setFontSize(36);
+        doc.setTextColor(255, 255, 255);
+        doc.setFont("helvetica", "bold");
+        doc.text("CERTIFICATE OF ACHIEVEMENT", 148.5, 50, null, null, "center");
+        // Add subtitle
+        doc.setFontSize(18);
+        doc.setFont("helvetica", "normal");
+        doc.text("This Certificate is Proudly Presented to", 148.5, 70, null, null, "center");
+        // Add name
+        doc.setFontSize(28);
+        doc.setFont("helvetica", "bold");
+        doc.text(user.name.toUpperCase(), 148.5, 90, null, null, "center");
+        // Add achievement text
+        doc.setFontSize(16);
+        doc.setFont("helvetica", "normal");
+        doc.text(`For successfully completing the examination with a score of ${res.marks}/${res.totalMarks}`, 148.5, 110, null, null, "center");
+        // Add date
+        doc.text(`Date: ${new Date().toLocaleDateString()}`, 148.5, 130, null, null, "center");
+        // Add seal
+        doc.setFillColor(255, 255, 255);
+        doc.circle(148.5, 160, 20, "F");
+        doc.setFontSize(12);
+        doc.setTextColor(67, 97, 238);
+        doc.setFont("helvetica", "normal");
+        doc.text("ExamPro", 148.5, 155, null, null, "center");
+        doc.setFontSize(8);
+        doc.text("Official Seal", 148.5, 160, null, null, "center");
+        // Add footer
+        doc.setFontSize(10);
+        doc.setTextColor(255, 255, 255);
+        doc.text("© ExamPro - All rights reserved", 148.5, 190, null, null, "center");
+        hideProgress();
+        doc.save(`ExamPro_Certificate_${user.name}.pdf`);
+      })
+      .catch(error => {
+        hideProgress();
+        showAlert("Failed to generate certificate. Please try again.", "danger");
+        console.error("Error:", error);
+      });
+    }
+
+    // Render navigation
+    function renderNav(attempted) {
+      const nav = document.getElementById("navLinks");
+      const user = JSON.parse(localStorage.getItem("user"));
+      document.getElementById("profilePic").textContent = user.name.charAt(0).toUpperCase();
+      if (attempted) {
+        nav.innerHTML = `
+          <a onclick="downloadPDF(window.examResults, '${user.name}'s Exam Results', 'ExamPro_${user.name}_Detailed_Results.pdf')"><i class="fas fa-file-alt"></i> Download PDF</a>
+          <a onclick="downloadCertificate()"><i class="fas fa-award"></i> Certificate</a>
+          <a onclick="window.location.href='index.html'"><i class="fas fa-home"></i> Home</a>
+          <a onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+        `;
+      } else {
+        nav.innerHTML = `
+          <a onclick="window.location.href='index.html'"><i class="fas fa-home"></i> Home</a>
+          <a onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+        `;
+      }
+    }
+
+    // Logout
+    function logout() {
+      localStorage.removeItem("user");
+      window.location.href = "index.html";
+    }
+
+    // Load page
+    function loadPage() {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user || !user.rollNumber) {
+        showAlert("User not logged in. Redirecting to login.", "danger");
+        setTimeout(() => window.location.href = "index.html", 2000);
+        return;
+      }
+      document.getElementById("topBar").style.display = "flex";
+      document.getElementById("profilePic").textContent = user.name.charAt(0).toUpperCase();
+      showProgress("Loading Exam...");
+      fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "checkAttempt", rollNumber: user.rollNumber })
+      })
+      .then(r => {
+        if (!r.ok) throw new Error("Network response was not ok");
+        return r.json();
+      })
+      .then(res => {
+        hideProgress();
+        renderNav(res.attempted);
+        if (res.attempted) {
+          fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({ action: "getMyResults", rollNumber: user.rollNumber })
+          })
+          .then(r => {
+            if (!r.ok) throw new Error("Network response was not ok");
+            return r.json();
+          })
+          .then(data => {
+            window.examResults = data; // Store results for PDF download
+            const content = document.getElementById("content");
+            content.innerHTML = `<h3>Your Detailed Results</h3>`;
+            let totalQuestions = data.length;
+            let correctAnswers = data.filter(q => q.isCorrect).length;
+            let scorePercentage = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+            content.innerHTML += `
+              <div class="question">
+                <p>Total Questions: ${totalQuestions}</p>
+                <p>Correct Answers: ${correctAnswers}</p>
+                <p>Score: ${scorePercentage}%</p>
+              </div>
+            `;
+            data.forEach((q, i) => {
+              content.innerHTML += `
+                <div class="question ${q.isCorrect ? '' : 'missed'}">
+                  <p><strong>${i + 1}. ${q.question}</strong></p>
+                  <p style="color: ${q.isCorrect ? '#0a6d8c' : 'var(--danger)'};">Your Answer: ${q.answer || "Not answered"}</p>
+                  <p style="color: #0a6d8c;">Correct Answer: ${q.correctAnswer}</p>
+                </div>
+              `;
+            });
+          })
+          .catch(error => {
+            hideProgress();
+            showAlert("Failed to load results. Please try again.", "danger");
+            console.error("Error:", error);
+          });
+        } else {
+          // Fetch questions from API or use sample questions
+          fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({ action: "getQuestions", quizId: "Exam1" })
+          })
+          .then(r => {
+            if (!r.ok) throw new Error("Network response was not ok");
+            return r.json();
+          })
+          .then(questions => {
+            if (questions && questions.length > 0) {
+              renderExam(questions);
+            } else {
+              // Fallback to sample questions
+              const sampleQs = [
+                { q: "2 + 2 = ?", options: ["3", "4", "5"], correct: "4" },
+                { q: "Capital of France?", options: ["Paris", "Rome", "Berlin"], correct: "Paris" },
+                { q: "5 - 2 = ?", options: ["2", "3", "4"], correct: "3" }
+              ];
+              renderExam(sampleQs);
+            }
+          })
+          .catch(error => {
+            hideProgress();
+            showAlert("Failed to load questions. Using sample questions.", "warning");
+            console.error("Error:", error);
+            const sampleQs = [
+              { q: "2 + 2 = ?", options: ["3", "4", "5"], correct: "4" },
+              { q: "Capital of France?", options: ["Paris", "Rome", "Berlin"], correct: "Paris" },
+              { q: "5 - 2 = ?", options: ["2", "3", "4"], correct: "3" }
+            ];
+            renderExam(sampleQs);
+          });
+        }
+      })
+      .catch(error => {
+        hideProgress();
+        showAlert("Failed to load exam data. Please try again.", "danger");
+        console.error("Error:", error);
+      });
+    }
+  </script>
 </body>
 </html>
