@@ -13,7 +13,23 @@
     input, button { width: 100%; padding: 8px; margin: 5px 0; }
     button { background: #4CAF50; color: white; border: none; cursor: pointer; }
     button:hover { background: #45a049; }
-    #loading { text-align: center; font-size: 18px; color: #666; display: none; }
+
+    /* Progress Modal */
+    #progressModal {
+      display: none;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+      display: flex; justify-content: center; align-items: center;
+    }
+    .progressBox {
+      background: white; padding: 20px; border-radius: 8px; text-align: center; width: 300px;
+    }
+    .progressBar {
+      width: 100%; background: #ddd; height: 20px; border-radius: 10px; overflow: hidden;
+    }
+    .progressFill {
+      height: 100%; width: 0; background: #4CAF50; transition: width 0.2s;
+    }
   </style>
 </head>
 <body>
@@ -25,8 +41,6 @@
 </header>
 
 <div class="container" id="mainContent">
-  <div id="loading">Loading...</div>
-
   <!-- Login/Signup Forms -->
   <div class="box" id="authBox">
     <h2 id="formTitle">Login</h2>
@@ -48,6 +62,17 @@
   <div id="homeView" style="display:none;">
     <h3>Welcome <span id="userName"></span>!</h3>
     <div id="examSection"></div>
+  </div>
+</div>
+
+<!-- Progress Modal -->
+<div id="progressModal">
+  <div class="progressBox">
+    <h3>Generating PDF...</h3>
+    <div class="progressBar">
+      <div class="progressFill" id="progressFill"></div>
+    </div>
+    <p id="progressText">0%</p>
   </div>
 </div>
 
@@ -74,7 +99,7 @@ function toggle(){
   }
 }
 
-// Login Function
+// Login
 function login(){
   fetch(API_URL, {
     method: "POST",
@@ -87,7 +112,7 @@ function login(){
   });
 }
 
-// Signup Function
+// Signup
 function signup(){
   fetch(API_URL, {
     method: "POST",
@@ -106,9 +131,31 @@ function logout(){
   location.reload();
 }
 
+// Show progress
+function showProgress(){
+  document.getElementById("progressModal").style.display = "flex";
+  document.getElementById("progressFill").style.width = "0%";
+  document.getElementById("progressText").innerText = "0%";
+  let progress = 0;
+  let interval = setInterval(()=>{
+    if(progress < 95){
+      progress += 5;
+      document.getElementById("progressFill").style.width = progress + "%";
+      document.getElementById("progressText").innerText = progress + "%";
+    } else {
+      clearInterval(interval);
+    }
+  }, 100);
+}
+function hideProgress(){
+  document.getElementById("progressFill").style.width = "100%";
+  document.getElementById("progressText").innerText = "100%";
+  setTimeout(()=> document.getElementById("progressModal").style.display = "none", 400);
+}
+
 // PDF: All Results
 function downloadAllResults(){
-  document.getElementById("loading").style.display = "block";
+  showProgress();
   fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "getAllResults" }) })
     .then(r=>r.json()).then(data=>{
       const doc = new jsPDF();
@@ -118,14 +165,14 @@ function downloadAllResults(){
         doc.text(`${row.name} (${row.rollNumber}): ${row.marks}/${row.totalMarks}`, 10, y);
         y += 8;
       });
+      hideProgress();
       doc.save("All_Results.pdf");
-      document.getElementById("loading").style.display = "none";
     });
 }
 
 // PDF: My Detailed Results
 function downloadMyResults(){
-  document.getElementById("loading").style.display = "block";
+  showProgress();
   const user = JSON.parse(localStorage.getItem("user"));
   fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "getMyResults", rollNumber: user.rollNumber }) })
     .then(r=>r.json()).then(data=>{
@@ -133,19 +180,18 @@ function downloadMyResults(){
       doc.text(`${user.name}'s Detailed Results`, 10, 10);
       let y = 20;
       data.forEach((q, i)=>{
-        doc.text(`${i+1}. ${q.question}`, 10, y);
-        y += 6;
+        doc.text(`${i+1}. ${q.question}`, 10, y); y += 6;
         doc.text(`Your Answer: ${q.answer}`, 12, y); y += 6;
         doc.text(`Correct Answer: ${q.correctAnswer}`, 12, y); y += 8;
       });
+      hideProgress();
       doc.save("My_Detailed_Results.pdf");
-      document.getElementById("loading").style.display = "none";
     });
 }
 
 // PDF: Certificate
 function downloadCertificate(){
-  document.getElementById("loading").style.display = "block";
+  showProgress();
   const user = JSON.parse(localStorage.getItem("user"));
   fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "getUserScore", rollNumber: user.rollNumber }) })
     .then(r=>r.json()).then(res=>{
@@ -159,53 +205,46 @@ function downloadCertificate(){
       doc.setFontSize(16);
       doc.text(`For successfully completing the exam with a score of ${res.marks}/${res.totalMarks}`, 50, 110);
       doc.text(`Date: ${new Date().toLocaleDateString()}`, 50, 130);
+      hideProgress();
       doc.save("Certificate.pdf");
-      document.getElementById("loading").style.display = "none";
     });
 }
 
-// Render Home View
+// Render Home
 function renderHome(){
   const user = JSON.parse(localStorage.getItem("user"));
   if(!user) return;
-
   document.getElementById("authBox").style.display = "none";
   document.getElementById("homeView").style.display = "block";
   document.getElementById("topBar").style.display = "flex";
   document.getElementById("userName").innerText = user.name;
   document.getElementById("profilePic").innerText = user.name.charAt(0).toUpperCase();
 
-  // Check Attempt
-  fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify({ action: "checkAttempt", rollNumber: user.rollNumber })
-  }).then(r=>r.json()).then(res=>{
-    let nav = document.getElementById("navLinks");
-    if(res.attempted){
-      nav.innerHTML = `
-        <a onclick="downloadAllResults()">Results</a>
-        <a onclick="downloadMyResults()">My Results</a>
-        <a onclick="downloadCertificate()">Certificate</a>
-        <a onclick="logout()">Sign Out</a>
-      `;
-      document.getElementById("examSection").innerHTML = `<p>You have already attempted the exam.</p>`;
-    } else {
-      nav.innerHTML = `
-        <a onclick="downloadAllResults()">Results</a>
-        <a onclick="window.location.href='exam.html'">Attempt Test</a>
-        <a onclick="logout()">Sign Out</a>
-      `;
-      document.getElementById("examSection").innerHTML = `<button onclick="location.href='exam.html'">Attempt Exam</button>`;
-    }
-  });
+  fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "checkAttempt", rollNumber: user.rollNumber }) })
+    .then(r=>r.json()).then(res=>{
+      let nav = document.getElementById("navLinks");
+      if(res.attempted){
+        nav.innerHTML = `
+          <a onclick="downloadAllResults()">Results</a>
+          <a onclick="downloadMyResults()">My Results</a>
+          <a onclick="downloadCertificate()">Certificate</a>
+          <a onclick="logout()">Sign Out</a>
+        `;
+        document.getElementById("examSection").innerHTML = `<p>You have already attempted the exam.</p>`;
+      } else {
+        nav.innerHTML = `
+          <a onclick="downloadAllResults()">Results</a>
+          <a onclick="window.location.href='exam.html'">Attempt Test</a>
+          <a onclick="logout()">Sign Out</a>
+        `;
+        document.getElementById("examSection").innerHTML = `<button onclick="location.href='exam.html'">Attempt Exam</button>`;
+      }
+    });
 }
 
-// On Page Load
 window.onload = function(){
   const user = JSON.parse(localStorage.getItem("user"));
-  if(user){
-    renderHome();
-  }
+  if(user){ renderHome(); }
 };
 </script>
 </body>
