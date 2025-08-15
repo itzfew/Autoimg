@@ -66,13 +66,14 @@
       background: var(--primary);
       color: white;
       padding: 0.5rem 1rem;
-      border-radius: var(--border-radius);
+      border-radius: 20px;
       font-weight: 600;
+      box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
     }
     
     .container {
       padding: 2rem;
-      max-width: 800px;
+      max-width: 1000px;
       margin: 0 auto;
       padding-top: 6rem;
     }
@@ -95,58 +96,37 @@
       color: #666;
     }
     
-    .question-container {
+    .question-card {
       background: white;
       padding: 1.5rem;
       border-radius: var(--border-radius);
       margin-bottom: 1.5rem;
       box-shadow: var(--box-shadow);
-    }
-    
-    .question-number {
-      color: var(--primary);
-      font-weight: 600;
-      margin-bottom: 1rem;
-    }
-    
-    .question-text {
-      font-size: 1.1rem;
-      margin-bottom: 1.5rem;
-    }
-    
-    .options-container {
-      display: grid;
-      gap: 1rem;
-    }
-    
-    .option {
-      display: flex;
-      align-items: center;
-      padding: 1rem;
-      border: 1px solid #ddd;
-      border-radius: var(--border-radius);
-      cursor: pointer;
       transition: var(--transition);
     }
     
-    .option:hover {
-      border-color: var(--primary);
-      background: #f5f7ff;
+    .question-card h3 {
+      margin-bottom: 1rem;
+      color: var(--dark);
     }
     
-    .option.selected {
-      border-color: var(--primary);
-      background: #f0f4ff;
+    .options {
+      margin-left: 1rem;
+    }
+    
+    .option {
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
     }
     
     .option input {
-      margin-right: 1rem;
+      margin-right: 0.8rem;
+      cursor: pointer;
     }
     
-    .navigation-buttons {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 2rem;
+    .option label {
+      cursor: pointer;
     }
     
     .btn {
@@ -161,12 +141,18 @@
       font-weight: 500;
       cursor: pointer;
       transition: var(--transition);
+      text-align: center;
     }
     
     .btn:hover {
       background: var(--primary-dark);
       transform: translateY(-2px);
       box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+    }
+    
+    .btn-block {
+      display: block;
+      width: 100%;
     }
     
     .btn-outline {
@@ -180,9 +166,8 @@
       color: white;
     }
     
-    .submit-section {
+    .text-center {
       text-align: center;
-      margin-top: 2rem;
     }
     
     /* Progress Modal */
@@ -232,10 +217,9 @@
     .alert-danger {
       background: rgba(247, 37, 133, 0.2);
       border-left: 4px solid var(--danger);
-      color: #a3124a;
+      color: #a3124e;
     }
     
-    /* Responsive */
     @media (max-width: 768px) {
       header {
         padding: 1rem;
@@ -246,7 +230,7 @@
         padding-top: 5rem;
       }
       
-      .question-container {
+      .question-card {
         padding: 1rem;
       }
     }
@@ -267,76 +251,63 @@
   
   <div class="exam-header">
     <h2>Final Examination</h2>
-    <p>Answer all questions carefully. You have 30 minutes to complete the exam.</p>
+    <p>Read each question carefully and select the correct answer</p>
   </div>
   
-  <div id="questionsContainer">
-    <!-- Questions will be dynamically inserted here -->
-  </div>
+  <div id="questionsContainer"></div>
   
-  <div class="navigation-buttons">
-    <button class="btn btn-outline" id="prevBtn" onclick="goToPreviousQuestion()" disabled>
-      <i class="fas fa-arrow-left"></i> Previous
-    </button>
-    <button class="btn btn-outline" id="nextBtn" onclick="goToNextQuestion()">
-      Next <i class="fas fa-arrow-right"></i>
-    </button>
-  </div>
-  
-  <div class="submit-section">
-    <button class="btn" id="submitBtn" onclick="confirmSubmit()" style="display: none;">
-      <i class="fas fa-paper-plane"></i> Submit Exam
-    </button>
+  <div class="text-center">
+    <button class="btn btn-block" id="submitBtn" onclick="submitExam()">Submit Exam</button>
   </div>
 </div>
 
 <!-- Progress Modal -->
 <div id="progressModal">
   <div class="progressBox">
-    <h3 id="progressTitle">Submitting Exam...</h3>
-    <p>Please wait while we process your answers.</p>
+    <h3>Submitting Exam...</h3>
+    <p>Please wait while we process your answers</p>
   </div>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbzeuqy6vFT9a3pNf22DRPvfJV_OFMIq8mnE8oL9rfxPQIIJr5UNz9b5ZHPHrKQMW0eigQ/exec";
-let examData = [];
-let currentQuestionIndex = 0;
-let userAnswers = {};
+const API_URL = "https://script.google.com/macros/s/AKfycbxhffcqyuTz2F2wlxKayixv2w1pFij8kmJJdJuqL6uhvTUGTjREabvYSQYv9JVGV6FZ5g/exec";
+const EXAM_DURATION = 30 * 60; // 30 minutes in seconds
+let timeLeft = EXAM_DURATION;
 let timerInterval;
-let timeLeft = 30 * 60; // 30 minutes in seconds
+let questions = [];
+let userAnswers = {};
 
-// Sample exam questions (in a real app, these would come from your API)
+// Sample questions - in a real app, these would come from your database
 const sampleQuestions = [
   {
     id: 1,
     question: "What is the capital of France?",
-    options: ["London", "Paris", "Berlin", "Madrid"],
-    correctAnswer: "Paris"
+    options: ["London", "Berlin", "Paris", "Madrid"],
+    answer: "Paris"
   },
   {
     id: 2,
     question: "Which planet is known as the Red Planet?",
     options: ["Venus", "Mars", "Jupiter", "Saturn"],
-    correctAnswer: "Mars"
+    answer: "Mars"
   },
   {
     id: 3,
-    question: "What is the largest mammal in the world?",
-    options: ["Elephant", "Blue Whale", "Giraffe", "Polar Bear"],
-    correctAnswer: "Blue Whale"
+    question: "What is 2 + 2?",
+    options: ["3", "4", "5", "6"],
+    answer: "4"
   },
   {
     id: 4,
-    question: "Which language is used primarily for web development?",
-    options: ["Java", "Python", "JavaScript", "C++"],
-    correctAnswer: "JavaScript"
+    question: "Who painted the Mona Lisa?",
+    options: ["Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci", "Michelangelo"],
+    answer: "Leonardo da Vinci"
   },
   {
     id: 5,
-    question: "What is the chemical symbol for gold?",
-    options: ["Go", "Gd", "Au", "Ag"],
-    correctAnswer: "Au"
+    question: "What is the largest ocean on Earth?",
+    options: ["Atlantic Ocean", "Indian Ocean", "Arctic Ocean", "Pacific Ocean"],
+    answer: "Pacific Ocean"
   }
 ];
 
@@ -344,18 +315,163 @@ const sampleQuestions = [
 document.addEventListener('DOMContentLoaded', function() {
   const user = JSON.parse(localStorage.getItem("user"));
   if(!user) {
-    showAlert('You need to login first', 'danger');
+    showAlert('Please login first', 'danger');
     setTimeout(() => {
       window.location.href = 'index.html';
     }, 2000);
     return;
   }
   
+  // Start timer
   startTimer();
-  loadExam();
+  
+  // Load questions
+  loadQuestions();
 });
 
-// Show alert message
+function loadQuestions() {
+  // In a real app, you would fetch these from your API
+  questions = sampleQuestions;
+  renderQuestions();
+}
+
+function renderQuestions() {
+  const container = document.getElementById('questionsContainer');
+  container.innerHTML = '';
+  
+  questions.forEach((q, index) => {
+    const questionHTML = `
+      <div class="question-card">
+        <h3>Question ${index + 1}: ${q.question}</h3>
+        <div class="options">
+          ${q.options.map((opt, i) => `
+            <div class="option">
+              <input type="radio" id="q${q.id}_opt${i}" name="q${q.id}" value="${opt}" 
+                     onchange="saveAnswer(${q.id}, '${opt}')">
+              <label for="q${q.id}_opt${i}">${opt}</label>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+    container.innerHTML += questionHTML;
+    
+    // Restore selected answers if any
+    if(userAnswers[q.id]) {
+      const radio = document.querySelector(`input[name="q${q.id}"][value="${userAnswers[q.id]}"]`);
+      if(radio) radio.checked = true;
+    }
+  });
+}
+
+function saveAnswer(questionId, answer) {
+  userAnswers[questionId] = answer;
+}
+
+function startTimer() {
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerDisplay();
+    
+    if(timeLeft <= 0) {
+      clearInterval(timerInterval);
+      submitExam();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+  document.getElementById('timer').textContent = 
+    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  
+  // Change color when time is running low
+  if(timeLeft <= 5 * 60) { // 5 minutes left
+    document.getElementById('timer').style.backgroundColor = 'var(--warning)';
+  }
+  if(timeLeft <= 60) { // 1 minute left
+    document.getElementById('timer').style.backgroundColor = 'var(--danger)';
+  }
+}
+
+function submitExam() {
+  clearInterval(timerInterval);
+  
+  // Validate all questions are answered
+  const unanswered = questions.filter(q => !userAnswers[q.id]);
+  if(unanswered.length > 0) {
+    if(!confirm(`You have ${unanswered.length} unanswered questions. Submit anyway?`)) {
+      startTimer(); // Resume timer if user cancels
+      return;
+    }
+  }
+  
+  showProgress();
+  
+  const user = JSON.parse(localStorage.getItem("user"));
+  if(!user) {
+    hideProgress();
+    showAlert('User not found. Please login again.', 'danger');
+    setTimeout(() => {
+      window.location.href = 'index.html';
+    }, 2000);
+    return;
+  }
+  
+  // Calculate score
+  let score = 0;
+  const detailedResults = questions.map(q => {
+    const isCorrect = userAnswers[q.id] === q.answer;
+    if(isCorrect) score++;
+    
+    return {
+      questionId: q.id,
+      question: q.question,
+      yourAnswer: userAnswers[q.id] || 'Not answered',
+      correctAnswer: q.answer,
+      isCorrect: isCorrect
+    };
+  });
+  
+  // Prepare exam data
+  const examData = {
+    action: "submitExam",
+    quizId: 'FINAL_EXAM_2023',
+    rollNumber: user.rollNumber,
+    name: user.name,
+    username: user.username,
+    marks: score,
+    totalMarks: questions.length,
+    percentage: (score / questions.length) * 100,
+    detailedResults: detailedResults
+  };
+  
+  // Submit to API
+  fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify(examData)
+  })
+  .then(response => response.json())
+  .then(data => {
+    hideProgress();
+    if(data.success) {
+      showAlert('Exam submitted successfully!', 'success');
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 2000);
+    } else {
+      showAlert('Submission failed. Please try again.', 'danger');
+    }
+  })
+  .catch(error => {
+    hideProgress();
+    showAlert('An error occurred. Please try again.', 'danger');
+    console.error('Error:', error);
+  });
+}
+
 function showAlert(message, type = 'success') {
   const alertBox = document.getElementById('alertBox');
   alertBox.textContent = message;
@@ -367,199 +483,13 @@ function showAlert(message, type = 'success') {
   }, 5000);
 }
 
-// Start the exam timer
-function startTimer() {
-  updateTimerDisplay();
-  timerInterval = setInterval(() => {
-    timeLeft--;
-    updateTimerDisplay();
-    
-    if(timeLeft <= 0) {
-      clearInterval(timerInterval);
-      showAlert('Time is up! Your exam will be submitted automatically.', 'danger');
-      setTimeout(() => {
-        submitExam();
-      }, 3000);
-    }
-  }, 1000);
-}
-
-// Update timer display
-function updateTimerDisplay() {
-  const minutes = Math.floor(timeLeft / 60);
-  const seconds = timeLeft % 60;
-  document.getElementById('timer').textContent = 
-    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  
-  // Change color when time is running low
-  if(timeLeft <= 5 * 60) { // 5 minutes left
-    document.getElementById('timer').style.backgroundColor = 'var(--warning)';
-  }
-  if(timeLeft <= 2 * 60) { // 2 minutes left
-    document.getElementById('timer').style.backgroundColor = 'var(--danger)';
-  }
-}
-
-// Load exam questions
-function loadExam() {
-  // In a real app, you would fetch these from your API
-  // fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "getExamQuestions" }) })
-  //   .then(response => response.json())
-  //   .then(data => {
-  //     examData = data;
-  //     renderQuestion(0);
-  //   });
-  
-  examData = sampleQuestions;
-  renderQuestion(currentQuestionIndex);
-}
-
-// Render a question
-function renderQuestion(index) {
-  const questionsContainer = document.getElementById('questionsContainer');
-  const question = examData[index];
-  
-  let optionsHtml = '';
-  question.options.forEach((option, i) => {
-    const isSelected = userAnswers[question.id] === option;
-    optionsHtml += `
-      <label class="option ${isSelected ? 'selected' : ''}">
-        <input type="radio" name="question_${question.id}" value="${option}" 
-          ${isSelected ? 'checked' : ''} onchange="selectAnswer(${question.id}, '${option}')">
-        ${option}
-      </label>
-    `;
-  });
-  
-  questionsContainer.innerHTML = `
-    <div class="question-container">
-      <div class="question-number">Question ${index + 1} of ${examData.length}</div>
-      <div class="question-text">${question.question}</div>
-      <div class="options-container">
-        ${optionsHtml}
-      </div>
-    </div>
-  `;
-  
-  // Update navigation buttons
-  document.getElementById('prevBtn').disabled = index === 0;
-  document.getElementById('nextBtn').style.display = index === examData.length - 1 ? 'none' : 'block';
-  document.getElementById('submitBtn').style.display = index === examData.length - 1 ? 'block' : 'none';
-  
-  currentQuestionIndex = index;
-}
-
-// Select an answer
-function selectAnswer(questionId, answer) {
-  userAnswers[questionId] = answer;
-  
-  // Update the selected option style
-  const options = document.querySelectorAll('.option');
-  options.forEach(option => {
-    option.classList.remove('selected');
-    if(option.querySelector('input').value === answer) {
-      option.classList.add('selected');
-    }
-  });
-}
-
-// Go to next question
-function goToNextQuestion() {
-  if(currentQuestionIndex < examData.length - 1) {
-    currentQuestionIndex++;
-    renderQuestion(currentQuestionIndex);
-  }
-}
-
-// Go to previous question
-function goToPreviousQuestion() {
-  if(currentQuestionIndex > 0) {
-    currentQuestionIndex--;
-    renderQuestion(currentQuestionIndex);
-  }
-}
-
-// Confirm before submitting
-function confirmSubmit() {
-  const unanswered = examData.filter(q => !userAnswers[q.id]).length;
-  
-  if(unanswered > 0) {
-    if(confirm(`You have ${unanswered} unanswered questions. Are you sure you want to submit?`)) {
-      submitExam();
-    }
-  } else {
-    if(confirm('Are you sure you want to submit your exam?')) {
-      submitExam();
-    }
-  }
-}
-
-// Submit the exam
-function submitExam() {
-  clearInterval(timerInterval);
-  showProgress('Submitting your exam...');
-  
-  const user = JSON.parse(localStorage.getItem("user"));
-  
-  // Calculate score
-  let correctAnswers = 0;
-  const details = examData.map(q => {
-    const isCorrect = userAnswers[q.id] === q.correctAnswer;
-    if(isCorrect) correctAnswers++;
-    
-    return {
-      question: q.question,
-      answer: userAnswers[q.id] || 'Not answered',
-      correctAnswer: q.correctAnswer,
-      isCorrect: isCorrect
-    };
-  });
-  
-  // In a real app, you would send this to your API
-  // const examResults = {
-  //   action: "saveResult",
-  //   quizId: "final_exam_1",
-  //   rollNumber: user.rollNumber,
-  //   name: user.name,
-  //   username: user.username,
-  //   marks: correctAnswers,
-  //   totalMarks: examData.length,
-  //   details: details
-  // };
-  
-  // fetch(API_URL, {
-  //   method: "POST",
-  //   body: JSON.stringify(examResults)
-  // })
-  // .then(response => response.json())
-  // .then(data => {
-  //   hideProgress();
-  //   if(data.success) {
-  //     window.location.href = 'index.html';
-  //   } else {
-  //     showAlert('Failed to submit exam. Please try again.', 'danger');
-  //   }
-  // });
-  
-  // For demo purposes, we'll just simulate the API call
-  setTimeout(() => {
-    hideProgress();
-    showAlert('Exam submitted successfully!', 'success');
-    setTimeout(() => {
-      window.location.href = 'index.html';
-    }, 2000);
-  }, 2000);
-}
-
-// Show progress
-function showProgress(title = 'Processing...') {
-  document.getElementById("progressTitle").textContent = title;
-  document.getElementById("progressModal").style.display = "flex";
+function showProgress() {
+  document.getElementById('progressModal').style.display = 'flex';
 }
 
 function hideProgress() {
-  document.getElementById("progressModal").style.display = "none";
+  document.getElementById('progressModal').style.display = 'none';
 }
 </script>
 </body>
-</html> 
+</html>
