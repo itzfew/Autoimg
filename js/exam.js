@@ -6,7 +6,7 @@ let timeLeft = 30 * 60; // 30 minutes in seconds
 function checkAttempt() {
     if (!currentUser) return;
     
-    fetch(https://script.google.com/macros/s/AKfycbwysUniRPzoa8Y4SFKzw_ihh_Rx4y8fQL5hjxRjAAQmovO_SR1xxZwtimKYvw-89DRHvA/exec, {
+    fetch(APP_URL, {
         method: "POST",
         headers: {
             'Content-Type': 'application/json'
@@ -161,7 +161,7 @@ function submitExam() {
 
 // Save Exam Results
 function saveResults(result) {
-    fetch(https://script.google.com/macros/s/AKfycbwysUniRPzoa8Y4SFKzw_ihh_Rx4y8fQL5hjxRjAAQmovO_SR1xxZwtimKYvw-89DRHvA/exec, {
+    fetch(APP_URL, {
         method: "POST",
         headers: {
             'Content-Type': 'application/json'
