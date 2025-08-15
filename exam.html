@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ExamPro - Take Exam</title>
+  <title>Exam System - Test</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
@@ -21,20 +21,20 @@
       --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
       --transition: all 0.3s ease;
     }
-
+    
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-
+    
     body {
       font-family: 'Poppins', sans-serif;
       background: #f5f7ff;
       color: var(--dark);
       line-height: 1.6;
     }
-
+    
     header {
       background: white;
       padding: 1rem 2rem;
@@ -47,16 +47,8 @@
       left: 0;
       right: 0;
       z-index: 1000;
-      transform: translateY(-100%);
-      opacity: 0;
-      transition: var(--transition);
     }
-
-    header.visible {
-      transform: translateY(0);
-      opacity: 1;
-    }
-
+    
     .logo {
       font-size: 1.5rem;
       font-weight: 700;
@@ -64,122 +56,99 @@
       display: flex;
       align-items: center;
     }
-
+    
     .logo i {
       margin-right: 0.5rem;
       font-size: 1.8rem;
     }
-
-    nav {
-      display: flex;
-      align-items: center;
-    }
-
-    nav a {
-      margin: 0 1rem;
-      text-decoration: none;
-      color: var(--dark);
-      font-weight: 500;
-      position: relative;
-      padding: 0.5rem 0;
-      transition: var(--transition);
-    }
-
-    nav a:hover {
-      color: var(--primary);
-    }
-
-    nav a::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 0;
-      height: 2px;
+    
+    .timer {
       background: var(--primary);
-      transition: var(--transition);
-    }
-
-    nav a:hover::after {
-      width: 100%;
-    }
-
-    .profile {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
       color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 1.1rem;
-      cursor: pointer;
-      transition: var(--transition);
-      box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+      padding: 0.5rem 1rem;
+      border-radius: var(--border-radius);
+      font-weight: 600;
     }
-
-    .profile:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(67, 97, 238, 0.4);
-    }
-
+    
     .container {
       padding: 2rem;
-      max-width: 1200px;
+      max-width: 800px;
       margin: 0 auto;
       padding-top: 6rem;
     }
-
-    .question {
+    
+    .exam-header {
       background: white;
       padding: 1.5rem;
-      margin-bottom: 1.5rem;
       border-radius: var(--border-radius);
+      margin-bottom: 1.5rem;
       box-shadow: var(--box-shadow);
-      transform: translateY(20px);
-      opacity: 0;
-      transition: var(--transition);
+      text-align: center;
     }
-
-    .question.visible {
-      transform: translateY(0);
-      opacity: 1;
+    
+    .exam-header h2 {
+      color: var(--primary);
+      margin-bottom: 0.5rem;
     }
-
-    .question p {
-      font-size: 1.1rem;
-      font-weight: 500;
-      color: var(--dark);
+    
+    .exam-header p {
+      color: #666;
+    }
+    
+    .question-container {
+      background: white;
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      margin-bottom: 1.5rem;
+      box-shadow: var(--box-shadow);
+    }
+    
+    .question-number {
+      color: var(--primary);
+      font-weight: 600;
       margin-bottom: 1rem;
     }
-
+    
+    .question-text {
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .options-container {
+      display: grid;
+      gap: 1rem;
+    }
+    
     .option {
       display: flex;
       align-items: center;
-      margin-bottom: 0.8rem;
-    }
-
-    .option input[type="radio"] {
-      margin-right: 0.8rem;
-      width: 1.2rem;
-      height: 1.2rem;
-      cursor: pointer;
-    }
-
-    .option label {
-      font-size: 1rem;
-      color: #666;
+      padding: 1rem;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
       cursor: pointer;
       transition: var(--transition);
     }
-
-    .option input[type="radio"]:checked + label {
-      color: var(--primary);
-      font-weight: 500;
+    
+    .option:hover {
+      border-color: var(--primary);
+      background: #f5f7ff;
     }
-
+    
+    .option.selected {
+      border-color: var(--primary);
+      background: #f0f4ff;
+    }
+    
+    .option input {
+      margin-right: 1rem;
+    }
+    
+    .navigation-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 2rem;
+    }
+    
     .btn {
       display: inline-block;
       background: var(--primary);
@@ -192,45 +161,30 @@
       font-weight: 500;
       cursor: pointer;
       transition: var(--transition);
-      text-align: center;
-      width: 100%;
-      max-width: 200px;
-      margin: 0 auto;
-      display: block;
     }
-
+    
     .btn:hover {
       background: var(--primary-dark);
       transform: translateY(-2px);
       box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
     }
-
-    .alert {
-      padding: 1rem;
-      border-radius: var(--border-radius);
-      margin-bottom: 1rem;
-      display: none;
-    }
-
-    .alert-success {
-      background: rgba(76, 201, 240, 0.2);
-      border-left: 4px solid var(--success);
-      color: #0a6d8c;
-    }
-
-    .alert-danger {
-      background: rgba(247, 37, 133, 0.2);
-      border-left: 4px solid var(--danger);
-      color: #8c0a3e;
-    }
-
-    h1 {
+    
+    .btn-outline {
+      background: transparent;
       color: var(--primary);
-      text-align: center;
-      margin-bottom: 2rem;
-      font-weight: 600;
+      border: 1px solid var(--primary);
     }
-
+    
+    .btn-outline:hover {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .submit-section {
+      text-align: center;
+      margin-top: 2rem;
+    }
+    
     /* Progress Modal */
     #progressModal {
       display: none;
@@ -245,7 +199,7 @@
       align-items: center;
       backdrop-filter: blur(5px);
     }
-
+    
     .progressBox {
       background: white;
       padding: 2rem;
@@ -254,254 +208,358 @@
       width: 100%;
       max-width: 400px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-      transform: scale(0.9);
-      opacity: 0;
-      transition: var(--transition);
     }
-
-    .progressBox.visible {
-      transform: scale(1);
-      opacity: 1;
-    }
-
+    
     .progressBox h3 {
       margin-bottom: 1.5rem;
       color: var(--primary);
     }
-
-    .progressBar {
-      width: 100%;
-      background: #f0f0f0;
-      height: 10px;
-      border-radius: 5px;
-      overflow: hidden;
+    
+    /* Alert */
+    .alert {
+      padding: 1rem;
+      border-radius: var(--border-radius);
       margin-bottom: 1rem;
+      display: none;
     }
-
-    .progressFill {
-      height: 100%;
-      width: 0;
-      background: linear-gradient(90deg, var(--primary), var(--success));
-      transition: width 0.3s ease;
+    
+    .alert-success {
+      background: rgba(76, 201, 240, 0.2);
+      border-left: 4px solid var(--success);
+      color: #0a6d8c;
     }
-
-    .progressText {
-      font-weight: 500;
-      color: var(--dark);
+    
+    .alert-danger {
+      background: rgba(247, 37, 133, 0.2);
+      border-left: 4px solid var(--danger);
+      color: #a3124a;
     }
-
+    
+    /* Responsive */
     @media (max-width: 768px) {
       header {
         padding: 1rem;
       }
-
-      nav a {
-        margin: 0 0.5rem;
-        font-size: 0.9rem;
-      }
-
+      
       .container {
         padding: 1rem;
         padding-top: 5rem;
       }
-
-      .question {
+      
+      .question-container {
         padding: 1rem;
       }
     }
   </style>
 </head>
 <body>
-  <header id="topBar">
-    <div class="logo">
-      <i class="fas fa-graduation-cap"></i>
-      <span>ExamPro</span>
-    </div>
-    <nav id="navLinks">
-      <a href="index.html"><i class="fas fa-home"></i> Home</a>
-      <a onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
-    </nav>
-    <div class="profile" id="profilePic" title="Profile"></div>
-  </header>
 
-  <div class="container">
-    <h1>Take Your Exam</h1>
-    <div id="alertBox" class="alert alert-success" style="display: none;"></div>
-    <div id="examContainer"></div>
-    <button class="btn" onclick="submitExam()">
-      <i class="fas fa-check"></i> Submit Exam
+<header>
+  <div class="logo">
+    <i class="fas fa-graduation-cap"></i>
+    <span>ExamPro</span>
+  </div>
+  <div class="timer" id="timer">30:00</div>
+</header>
+
+<div class="container">
+  <div id="alertBox" class="alert" style="display: none;"></div>
+  
+  <div class="exam-header">
+    <h2>Final Examination</h2>
+    <p>Answer all questions carefully. You have 30 minutes to complete the exam.</p>
+  </div>
+  
+  <div id="questionsContainer">
+    <!-- Questions will be dynamically inserted here -->
+  </div>
+  
+  <div class="navigation-buttons">
+    <button class="btn btn-outline" id="prevBtn" onclick="goToPreviousQuestion()" disabled>
+      <i class="fas fa-arrow-left"></i> Previous
+    </button>
+    <button class="btn btn-outline" id="nextBtn" onclick="goToNextQuestion()">
+      Next <i class="fas fa-arrow-right"></i>
     </button>
   </div>
-
-  <div id="progressModal">
-    <div class="progressBox">
-      <h3 id="progressTitle">Processing...</h3>
-      <div class="progressBar">
-        <div class="progressFill" id="progressFill"></div>
-      </div>
-      <p class="progressText" id="progressText">0%</p>
-    </div>
+  
+  <div class="submit-section">
+    <button class="btn" id="submitBtn" onclick="confirmSubmit()" style="display: none;">
+      <i class="fas fa-paper-plane"></i> Submit Exam
+    </button>
   </div>
+</div>
 
-  <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbzeuqy6vFT9a3pNf22DRPvfJV_OFMIq8mnE8oL9rfxPQIIJr5UNz9b5ZHPHrKQMW0eigQ/exec";
-    const user = JSON.parse(localStorage.getItem("user"));
+<!-- Progress Modal -->
+<div id="progressModal">
+  <div class="progressBox">
+    <h3 id="progressTitle">Submitting Exam...</h3>
+    <p>Please wait while we process your answers.</p>
+  </div>
+</div>
 
-    // Redirect to index if not logged in
-    if (!user) {
-      window.location.href = "index.html";
-    }
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbzeuqy6vFT9a3pNf22DRPvfJV_OFMIq8mnE8oL9rfxPQIIJr5UNz9b5ZHPHrKQMW0eigQ/exec";
+let examData = [];
+let currentQuestionIndex = 0;
+let userAnswers = {};
+let timerInterval;
+let timeLeft = 30 * 60; // 30 minutes in seconds
 
-    // Initialize the page
-    document.addEventListener('DOMContentLoaded', function () {
+// Sample exam questions (in a real app, these would come from your API)
+const sampleQuestions = [
+  {
+    id: 1,
+    question: "What is the capital of France?",
+    options: ["London", "Paris", "Berlin", "Madrid"],
+    correctAnswer: "Paris"
+  },
+  {
+    id: 2,
+    question: "Which planet is known as the Red Planet?",
+    options: ["Venus", "Mars", "Jupiter", "Saturn"],
+    correctAnswer: "Mars"
+  },
+  {
+    id: 3,
+    question: "What is the largest mammal in the world?",
+    options: ["Elephant", "Blue Whale", "Giraffe", "Polar Bear"],
+    correctAnswer: "Blue Whale"
+  },
+  {
+    id: 4,
+    question: "Which language is used primarily for web development?",
+    options: ["Java", "Python", "JavaScript", "C++"],
+    correctAnswer: "JavaScript"
+  },
+  {
+    id: 5,
+    question: "What is the chemical symbol for gold?",
+    options: ["Go", "Gd", "Au", "Ag"],
+    correctAnswer: "Au"
+  }
+];
+
+// Initialize the exam
+document.addEventListener('DOMContentLoaded', function() {
+  const user = JSON.parse(localStorage.getItem("user"));
+  if(!user) {
+    showAlert('You need to login first', 'danger');
+    setTimeout(() => {
+      window.location.href = 'index.html';
+    }, 2000);
+    return;
+  }
+  
+  startTimer();
+  loadExam();
+});
+
+// Show alert message
+function showAlert(message, type = 'success') {
+  const alertBox = document.getElementById('alertBox');
+  alertBox.textContent = message;
+  alertBox.className = `alert alert-${type}`;
+  alertBox.style.display = 'block';
+  
+  setTimeout(() => {
+    alertBox.style.display = 'none';
+  }, 5000);
+}
+
+// Start the exam timer
+function startTimer() {
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerDisplay();
+    
+    if(timeLeft <= 0) {
+      clearInterval(timerInterval);
+      showAlert('Time is up! Your exam will be submitted automatically.', 'danger');
       setTimeout(() => {
-        document.getElementById('topBar').classList.add('visible');
-        document.getElementById('profilePic').textContent = user.name.charAt(0).toUpperCase();
-        renderExam();
-      }, 100);
-    });
-
-    // Show alert message
-    function showAlert(message, type = 'success') {
-      const alertBox = document.getElementById('alertBox');
-      alertBox.textContent = message;
-      alertBox.className = `alert alert-${type}`;
-      alertBox.style.display = 'block';
-      setTimeout(() => {
-        alertBox.style.display = 'none';
-      }, 5000);
+        submitExam();
+      }, 3000);
     }
+  }, 1000);
+}
 
-    // Progress Modal
-    function showProgress(title = 'Processing...') {
-      document.getElementById("progressTitle").textContent = title;
-      document.getElementById("progressModal").style.display = "flex";
-      document.getElementById("progressFill").style.width = "0%";
-      document.getElementById("progressText").textContent = "0%";
-      setTimeout(() => {
-        document.querySelector('.progressBox').classList.add('visible');
-      }, 10);
-      let progress = 0;
-      let interval = setInterval(() => {
-        if (progress < 50) {
-          progress += 5;
-          document.getElementById("progressFill").style.width = progress + "%";
-          document.getElementById("progressText").textContent = progress + "%";
-        } else {
-          clearInterval(interval);
-        }
-      }, 200);
+// Update timer display
+function updateTimerDisplay() {
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+  document.getElementById('timer').textContent = 
+    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  
+  // Change color when time is running low
+  if(timeLeft <= 5 * 60) { // 5 minutes left
+    document.getElementById('timer').style.backgroundColor = 'var(--warning)';
+  }
+  if(timeLeft <= 2 * 60) { // 2 minutes left
+    document.getElementById('timer').style.backgroundColor = 'var(--danger)';
+  }
+}
+
+// Load exam questions
+function loadExam() {
+  // In a real app, you would fetch these from your API
+  // fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "getExamQuestions" }) })
+  //   .then(response => response.json())
+  //   .then(data => {
+  //     examData = data;
+  //     renderQuestion(0);
+  //   });
+  
+  examData = sampleQuestions;
+  renderQuestion(currentQuestionIndex);
+}
+
+// Render a question
+function renderQuestion(index) {
+  const questionsContainer = document.getElementById('questionsContainer');
+  const question = examData[index];
+  
+  let optionsHtml = '';
+  question.options.forEach((option, i) => {
+    const isSelected = userAnswers[question.id] === option;
+    optionsHtml += `
+      <label class="option ${isSelected ? 'selected' : ''}">
+        <input type="radio" name="question_${question.id}" value="${option}" 
+          ${isSelected ? 'checked' : ''} onchange="selectAnswer(${question.id}, '${option}')">
+        ${option}
+      </label>
+    `;
+  });
+  
+  questionsContainer.innerHTML = `
+    <div class="question-container">
+      <div class="question-number">Question ${index + 1} of ${examData.length}</div>
+      <div class="question-text">${question.question}</div>
+      <div class="options-container">
+        ${optionsHtml}
+      </div>
+    </div>
+  `;
+  
+  // Update navigation buttons
+  document.getElementById('prevBtn').disabled = index === 0;
+  document.getElementById('nextBtn').style.display = index === examData.length - 1 ? 'none' : 'block';
+  document.getElementById('submitBtn').style.display = index === examData.length - 1 ? 'block' : 'none';
+  
+  currentQuestionIndex = index;
+}
+
+// Select an answer
+function selectAnswer(questionId, answer) {
+  userAnswers[questionId] = answer;
+  
+  // Update the selected option style
+  const options = document.querySelectorAll('.option');
+  options.forEach(option => {
+    option.classList.remove('selected');
+    if(option.querySelector('input').value === answer) {
+      option.classList.add('selected');
     }
+  });
+}
 
-    function hideProgress() {
-      document.getElementById("progressFill").style.width = "100%";
-      document.getElementById("progressText").textContent = "100%";
-      setTimeout(() => {
-        document.querySelector('.progressBox').classList.remove('visible');
-        setTimeout(() => {
-          document.getElementById("progressModal").style.display = "none";
-        }, 300);
-      }, 500);
+// Go to next question
+function goToNextQuestion() {
+  if(currentQuestionIndex < examData.length - 1) {
+    currentQuestionIndex++;
+    renderQuestion(currentQuestionIndex);
+  }
+}
+
+// Go to previous question
+function goToPreviousQuestion() {
+  if(currentQuestionIndex > 0) {
+    currentQuestionIndex--;
+    renderQuestion(currentQuestionIndex);
+  }
+}
+
+// Confirm before submitting
+function confirmSubmit() {
+  const unanswered = examData.filter(q => !userAnswers[q.id]).length;
+  
+  if(unanswered > 0) {
+    if(confirm(`You have ${unanswered} unanswered questions. Are you sure you want to submit?`)) {
+      submitExam();
     }
-
-    // Logout
-    function logout() {
-      localStorage.removeItem("user");
-      window.location.href = "index.html";
+  } else {
+    if(confirm('Are you sure you want to submit your exam?')) {
+      submitExam();
     }
+  }
+}
 
-    // Render Exam Questions
-    function renderExam() {
-      const questions = [
-        { q: "2 + 2 = ?", options: ["3", "4", "5"], correct: "4" },
-        { q: "Capital of France?", options: ["Paris", "Rome", "Berlin"], correct: "Paris" }
-      ];
-      const examContainer = document.getElementById("examContainer");
-      examContainer.innerHTML = '';
-      questions.forEach((ques, i) => {
-        examContainer.innerHTML += `
-          <div class="question">
-            <p>${i + 1}. ${ques.q}</p>
-            ${ques.options.map(opt => `
-              <div class="option">
-                <input type="radio" id="q${i}_${opt}" name="q${i}" value="${opt}">
-                <label for="q${i}_${opt}">${opt}</label>
-              </div>
-            `).join('')}
-          </div>
-        `;
-      });
+// Submit the exam
+function submitExam() {
+  clearInterval(timerInterval);
+  showProgress('Submitting your exam...');
+  
+  const user = JSON.parse(localStorage.getItem("user"));
+  
+  // Calculate score
+  let correctAnswers = 0;
+  const details = examData.map(q => {
+    const isCorrect = userAnswers[q.id] === q.correctAnswer;
+    if(isCorrect) correctAnswers++;
+    
+    return {
+      question: q.question,
+      answer: userAnswers[q.id] || 'Not answered',
+      correctAnswer: q.correctAnswer,
+      isCorrect: isCorrect
+    };
+  });
+  
+  // In a real app, you would send this to your API
+  // const examResults = {
+  //   action: "saveResult",
+  //   quizId: "final_exam_1",
+  //   rollNumber: user.rollNumber,
+  //   name: user.name,
+  //   username: user.username,
+  //   marks: correctAnswers,
+  //   totalMarks: examData.length,
+  //   details: details
+  // };
+  
+  // fetch(API_URL, {
+  //   method: "POST",
+  //   body: JSON.stringify(examResults)
+  // })
+  // .then(response => response.json())
+  // .then(data => {
+  //   hideProgress();
+  //   if(data.success) {
+  //     window.location.href = 'index.html';
+  //   } else {
+  //     showAlert('Failed to submit exam. Please try again.', 'danger');
+  //   }
+  // });
+  
+  // For demo purposes, we'll just simulate the API call
+  setTimeout(() => {
+    hideProgress();
+    showAlert('Exam submitted successfully!', 'success');
+    setTimeout(() => {
+      window.location.href = 'index.html';
+    }, 2000);
+  }, 2000);
+}
 
-      // Add animation to questions
-      setTimeout(() => {
-        document.querySelectorAll('.question').forEach((q, index) => {
-          setTimeout(() => {
-            q.classList.add('visible');
-          }, index * 100);
-        });
-      }, 50);
-    }
+// Show progress
+function showProgress(title = 'Processing...') {
+  document.getElementById("progressTitle").textContent = title;
+  document.getElementById("progressModal").style.display = "flex";
+}
 
-    // Submit Exam
-    function submitExam() {
-      const questions = [
-        { q: "2 + 2 = ?", options: ["3", "4", "5"], correct: "4" },
-        { q: "Capital of France?", options: ["Paris", "Rome", "Berlin"], correct: "Paris" }
-      ];
-      let score = 0;
-      let details = [];
-      let allAnswered = true;
-
-      questions.forEach((ques, i) => {
-        let ans = document.querySelector(`input[name=q${i}]:checked`)?.value || "";
-        if (!ans) allAnswered = false;
-        let correct = ques.correct;
-        let isCorrect = ans === correct;
-        if (isCorrect) score++;
-        details.push({ question: ques.q, answer: ans, correctAnswer: correct, isCorrect });
-      });
-
-      if (!allAnswered) {
-        showAlert('Please answer all questions before submitting.', 'danger');
-        return;
-      }
-
-      showProgress('Submitting Exam...');
-
-      fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          action: "saveResult",
-          quizId: "Quiz1",
-          rollNumber: user.rollNumber,
-          name: user.name,
-          username: user.username,
-          marks: score,
-          totalMarks: questions.length,
-          details
-        })
-      })
-      .then(r => {
-        if (!r.ok) throw new Error('Network response was not ok');
-        return r.json();
-      })
-      .then(res => {
-        hideProgress();
-        if (res.success) {
-          showAlert(`Exam submitted! You scored ${score}/${questions.length}`, 'success');
-          setTimeout(() => {
-            window.location.href = "index.html";
-          }, 2000);
-        } else {
-          showAlert('Failed to submit exam. Please try again.', 'danger');
-        }
-      })
-      .catch(error => {
-        hideProgress();
-        showAlert('An error occurred. Please try again later.', 'danger');
-        console.error('Error:', error);
-      });
-    }
-  </script>
+function hideProgress() {
+  document.getElementById("progressModal").style.display = "none";
+}
+</script>
 </body>
-</html>
+</html> 
