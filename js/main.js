@@ -2,7 +2,7 @@
 function downloadAllResults() {
     if (!currentUser) return;
     
-    fetch(APP_URL, {
+    fetch(https://script.google.com/macros/s/AKfycbwysUniRPzoa8Y4SFKzw_ihh_Rx4y8fQL5hjxRjAAQmovO_SR1xxZwtimKYvw-89DRHvA/exec, {
         method: "POST",
         headers: {
             'Content-Type': 'application/json'
@@ -74,7 +74,7 @@ function generateAllResultsPDF(results) {
 function downloadMyResults() {
     if (!currentUser) return;
     
-    fetch(APP_URL, {
+    fetch(https://script.google.com/macros/s/AKfycbwysUniRPzoa8Y4SFKzw_ihh_Rx4y8fQL5hjxRjAAQmovO_SR1xxZwtimKYvw-89DRHvA/exec, {
         method: "POST",
         headers: {
             'Content-Type': 'application/json'
@@ -229,7 +229,7 @@ function generateExamPaperPDF(quizData) {
 function downloadCertificate() {
     if (!currentUser) return;
     
-    fetch(APP_URL, {
+    fetch(https://script.google.com/macros/s/AKfycbwysUniRPzoa8Y4SFKzw_ihh_Rx4y8fQL5hjxRjAAQmovO_SR1xxZwtimKYvw-89DRHvA/exec, {
         method: "POST",
         headers: {
             'Content-Type': 'application/json'
