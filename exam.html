@@ -1,60 +1,547 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Exam</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ExamPro - Take Exam</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
-    body { font-family: Arial; padding: 20px; background: #f5f5f5; }
-    .question { background: white; padding: 15px; margin-bottom: 10px; border-radius: 6px; }
-    button { padding: 10px 15px; background: #4CAF50; color: white; border: none; cursor: pointer; }
-    button:hover { background: #45a049; }
+    :root {
+      --primary: #4361ee;
+      --primary-dark: #3a56d4;
+      --secondary: #3f37c9;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --success: #4cc9f0;
+      --danger: #f72585;
+      --warning: #f8961e;
+      --info: #4895ef;
+      --border-radius: 12px;
+      --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f5f7ff;
+      color: var(--dark);
+      line-height: 1.6;
+    }
+    
+    header {
+      background: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--box-shadow);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      transform: translateY(-100%);
+      opacity: 0;
+      transition: var(--transition);
+    }
+    
+    header.visible {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+    }
+    
+    .logo i {
+      margin-right: 0.5rem;
+      font-size: 1.8rem;
+    }
+    
+    nav {
+      display: flex;
+      align-items: center;
+    }
+    
+    nav a {
+      margin: 0 1rem;
+      text-decoration: none;
+      color: var(--dark);
+      font-weight: 500;
+      position: relative;
+      padding: 0.5rem 0;
+      transition: var(--transition);
+    }
+    
+    nav a:hover {
+      color: var(--primary);
+    }
+    
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--primary);
+      transition: var(--transition);
+    }
+    
+    nav a:hover::after {
+      width: 100%;
+    }
+    
+    .profile {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+    }
+    
+    .profile:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(67, 97, 238, 0.4);
+    }
+    
+    .container {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-top: 6rem;
+    }
+    
+    .box {
+      background: white;
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      width: 100%;
+      max-width: 800px;
+      margin: 2rem auto;
+      box-shadow: var(--box-shadow);
+      transform: translateY(20px);
+      opacity: 0;
+      transition: var(--transition);
+    }
+    
+    .box.visible {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    .box h2 {
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+      text-align: center;
+      font-weight: 600;
+    }
+    
+    .question {
+      margin-bottom: 2rem;
+    }
+    
+    .question h4 {
+      color: var(--dark);
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+    
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .option {
+      display: flex;
+      align-items: center;
+      padding: 0.8rem;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    
+    .option:hover {
+      border-color: var(--primary);
+      background: rgba(67, 97, 238, 0.1);
+    }
+    
+    .option input {
+      margin-right: 0.5rem;
+    }
+    
+    .btn {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: var(--border-radius);
+      font-family: 'Poppins', sans-serif;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      text-align: center;
+      width: 100%;
+    }
+    
+    .btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+    }
+    
+    .alert {
+      padding: 1rem;
+      border-radius: var(--border-radius);
+      margin-bottom: 1rem;
+      display: none;
+    }
+    
+    .alert-success {
+      background: rgba(76, 201, 240, 0.2);
+      border-left: 4px solid var(--success);
+      color: #0a6d8c;
+    }
+    
+    .alert-danger {
+      background: rgba(247, 37, 133, 0.2);
+      border-left: 4px solid var(--danger);
+      color: #8c0a3b;
+    }
+    
+    /* Progress Modal */
+    #progressModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(5px);
+    }
+    
+    .progressBox {
+      background: white;
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      text-align: center;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      transform: scale(0.9);
+      opacity: 0;
+      transition: var(--transition);
+    }
+    
+    .progressBox.visible {
+      transform: scale(1);
+      opacity: 1;
+    }
+    
+    .progressBox h3 {
+      margin-bottom: 1.5rem;
+      color: var(--primary);
+    }
+    
+    .progressBar {
+      width: 100%;
+      background: #f0f0f0;
+      height: 10px;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+    
+    .progressFill {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--primary), var(--success));
+      transition: width 0.3s ease;
+    }
+    
+    .progressText {
+      font-weight: 500;
+      color: var(--dark);
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease forwards;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      header {
+        padding: 1rem;
+      }
+      
+      nav a {
+        margin: 0 0.5rem;
+        font-size: 0.9rem;
+      }
+      
+      .container {
+        padding: 1rem;
+        padding-top: 5rem;
+      }
+      
+      .box {
+        padding: 1.5rem;
+      }
+    }
   </style>
 </head>
 <body>
-<h1>Exam</h1>
-<div id="examContainer"></div>
-<button onclick="submitExam()">Submit</button>
-
-<script>
-const API_URL = "https://script.google.com/macros/s/AKfycby9u8GQS-T7rYVJjpJDsxWX1LQbYbktWWReZGVKtPvFS0tKBAhuGN_959rt8SKhNl15-A/exec";
-const user = JSON.parse(localStorage.getItem("user"));
-if(!user) window.location.href = "index.html";
-
-// Questions
-const questions = [
-  { q: "2+2=?", options: ["3","4","5"], correct: "4" },
-  { q: "Capital of France?", options: ["Paris","Rome","Berlin"], correct: "Paris" }
-];
-
-const examContainer = document.getElementById("examContainer");
-questions.forEach((ques, i)=>{
-  examContainer.innerHTML += `
-    <div class="question">
-      <p>${i+1}. ${ques.q}</p>
-      ${ques.options.map(opt=>`<label><input type="radio" name="q${i}" value="${opt}"> ${opt}</label>`).join('<br>')}
+  <header id="topBar">
+    <div class="logo">
+      <i class="fas fa-graduation-cap"></i>
+      <span>ExamPro</span>
     </div>
-  `;
-});
+    <nav id="navLinks">
+      <a href="index.html"><i class="fas fa-home"></i> Home</a>
+      <a onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+    </nav>
+    <div class="profile" id="profilePic" title="Profile"></div>
+  </header>
 
-function submitExam(){
-  let score = 0;
-  let details = [];
-  questions.forEach((ques,i)=>{
-    let ans = document.querySelector(`input[name=q${i}]:checked`)?.value || "";
-    let correct = ques.correct;
-    let isCorrect = ans === correct;
-    if(isCorrect) score++;
-    details.push({ question: ques.q, answer: ans, correctAnswer: correct, isCorrect });
-  });
-  fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify({ action: "saveResult", quizId: "Quiz1", rollNumber: user.rollNumber, name: user.name, username: user.username, marks: score, totalMarks: questions.length, details })
-  }).then(r=>r.json()).then(res=>{
-    if(res.success) {
-      alert("Exam submitted! You scored " + score + "/" + questions.length);
-      window.location.href = "index.html";
+  <div class="container" id="mainContent">
+    <div class="box" id="examBox">
+      <h2>Examination</h2>
+      <div id="alertBox" class="alert alert-success" style="display: none;"></div>
+      <div id="examForm">
+        <div id="questionsContainer"></div>
+        <button class="btn" onclick="submitExam()">Submit Exam</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress Modal -->
+  <div id="progressModal">
+    <div class="progressBox">
+      <h3 id="progressTitle">Processing...</h3>
+      <div class="progressBar">
+        <div class="progressFill" id="progressFill"></div>
+      </div>
+      <p class="progressText" id="progressText">0%</p>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycby9u8GQS-T7rYVJjpJDsxWX1LQbYbktWWReZGVKtPvFS0tKBAhuGN_959rt8SKhNl15-A/exec";
+
+    // Initialize the app
+    document.addEventListener('DOMContentLoaded', function() {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user || !user.rollNumber) {
+        showAlert('You must be logged in to take the exam.', 'danger');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 2000);
+        return;
+      }
+
+      // Show elements with animation
+      setTimeout(() => {
+        document.getElementById('examBox').classList.add('visible');
+        document.getElementById('topBar').classList.add('visible');
+      }, 100);
+
+      document.getElementById("profilePic").textContent = user.name.charAt(0).toUpperCase();
+      loadExamQuestions();
+    });
+
+    // Show alert message
+    function showAlert(message, type = 'success') {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.textContent = message;
+      alertBox.className = `alert alert-${type}`;
+      alertBox.style.display = 'block';
+      
+      setTimeout(() => {
+        alertBox.style.display = 'none';
+      }, 5000);
     }
-  });
-}
-</script>
+
+    // Progress Modal
+    function showProgress(title = 'Processing...') {
+      document.getElementById("progressTitle").textContent = title;
+      document.getElementById("progressModal").style.display = "flex";
+      document.getElementById("progressFill").style.width = "0%";
+      document.getElementById("progressText").textContent = "0%";
+      
+      setTimeout(() => {
+        document.querySelector('.progressBox').classList.add('visible');
+      }, 10);
+      
+      let progress = 0;
+      let interval = setInterval(() => {
+        if (progress < 50) {
+          progress += 5;
+          document.getElementById("progressFill").style.width = progress + "%";
+          document.getElementById("progressText").textContent = progress + "%";
+        } else {
+          clearInterval(interval);
+        }
+      }, 200);
+    }
+
+    function hideProgress() {
+      document.getElementById("progressFill").style.width = "100%";
+      document.getElementById("progressText").textContent = "100%";
+      
+      setTimeout(() => {
+        document.querySelector('.progressBox').classList.remove('visible');
+        setTimeout(() => {
+          document.getElementById("progressModal").style.display = "none";
+        }, 300);
+      }, 500);
+    }
+
+    // Load exam questions
+    function loadExamQuestions() {
+      const user = JSON.parse(localStorage.getItem("user"));
+      showProgress('Loading exam questions...');
+      
+      fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ 
+          action: "getExamQuestions",
+          rollNumber: user.rollNumber
+        })
+      })
+      .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+      })
+      .then(data => {
+        hideProgress();
+        if (data.success && data.questions) {
+          renderQuestions(data.questions);
+        } else {
+          showAlert('Failed to load exam questions. Please try again.', 'danger');
+        }
+      })
+      .catch(error => {
+        hideProgress();
+        showAlert('An error occurred while loading questions. Please try again.', 'danger');
+        console.error('Error:', error);
+      });
+    }
+
+    // Render questions
+    function renderQuestions(questions) {
+      const container = document.getElementById('questionsContainer');
+      container.innerHTML = '';
+      
+      questions.forEach((question, index) => {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question';
+        questionDiv.innerHTML = `
+          <h4>${index + 1}. ${question.question}</h4>
+          <div class="options">
+            ${question.options.map((option, i) => `
+              <label class="option">
+                <input type="radio" name="question_${question.id}" value="${option}" required>
+                ${option}
+              </label>
+            `).join('')}
+          </div>
+        `;
+        container.appendChild(questionDiv);
+      });
+    }
+
+    // Submit exam
+    function submitExam() {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const questions = document.querySelectorAll('.question');
+      const answers = [];
+      
+      questions.forEach((question, index) => {
+        const selectedOption = question.querySelector(`input[name="question_${index + 1}"]:checked`);
+        if (selectedOption) {
+          answers.push({
+            id: index + 1,
+            answer: selectedOption.value
+          });
+        }
+      });
+      
+      if (answers.length !== questions.length) {
+        showAlert('Please answer all questions before submitting.', 'danger');
+        return;
+      }
+      
+      showProgress('Submitting exam...');
+      
+      fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action: "submitExam",
+          rollNumber: user.rollNumber,
+          answers: answers
+        })
+      })
+      .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+      })
+      .then(res => {
+        hideProgress();
+        if (res.success) {
+          showAlert('Exam submitted successfully! Redirecting to home...', 'success');
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 2000);
+        } else {
+          showAlert(res.message || 'Failed to submit exam. Please try again.', 'danger');
+        }
+      })
+      .catch(error => {
+        hideProgress();
+        showAlert('An error occurred while submitting. Please try again.', 'danger');
+        console.error('Error:', error);
+      });
+    }
+
+    // Logout
+    function logout() {
+      localStorage.removeItem("user");
+      window.location.href = 'index.html';
+    }
+  </script>
 </body>
 </html>
