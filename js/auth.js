@@ -115,7 +115,7 @@ function registerUser() {
     
     const rollNumber = generateRollNumber();
     
-    fetch(APP_URL, {
+    fetch(https://script.google.com/macros/s/AKfycbwysUniRPzoa8Y4SFKzw_ihh_Rx4y8fQL5hjxRjAAQmovO_SR1xxZwtimKYvw-89DRHvA/exec, {
         method: "POST",
         headers: {
             'Content-Type': 'application/json'
@@ -164,7 +164,7 @@ function loginUser() {
         return;
     }
     
-    fetch(APP_URL, {
+    fetch(https://script.google.com/macros/s/AKfycbwysUniRPzoa8Y4SFKzw_ihh_Rx4y8fQL5hjxRjAAQmovO_SR1xxZwtimKYvw-89DRHvA/exec, {
         method: "POST",
         headers: {
             'Content-Type': 'application/json'
