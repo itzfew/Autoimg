@@ -1,207 +1,1042 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Exam Portal</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<style>
-    body { font-family: Arial, sans-serif; margin: 0; background: #f7f7f7; }
-    header { background: #007bff; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
-    nav a { color: white; margin: 0 10px; text-decoration: none; }
-    nav a:hover { text-decoration: underline; }
-    .profile-pic {
-        background: white; color: #007bff; border-radius: 50%; width: 40px; height: 40px;
-        display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 18px;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exam System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-dark: #3a56d4;
+      --secondary: #3f37c9;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --success: #4cc9f0;
+      --danger: #f72585;
+      --warning: #f8961e;
+      --info: #4895ef;
+      --border-radius: 12px;
+      --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
     }
-    .container { padding: 20px; }
-    .form-box { background: white; padding: 20px; border-radius: 8px; max-width: 400px; margin: 40px auto; }
-    input, button { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; }
-    button { background: #007bff; color: white; border: none; cursor: pointer; }
-    button:hover { background: #0056b3; }
-    #progressBar { display: none; margin: 20px auto; width: 80%; background: #ccc; border-radius: 10px; }
-    #progressBar div { height: 20px; width: 0%; background: green; border-radius: 10px; }
-</style>
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f5f7ff;
+      color: var(--dark);
+      line-height: 1.6;
+    }
+    
+    header {
+      background: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--box-shadow);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      transform: translateY(-100%);
+      opacity: 0;
+      transition: var(--transition);
+    }
+    
+    header.visible {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+    }
+    
+    .logo i {
+      margin-right: 0.5rem;
+      font-size: 1.8rem;
+    }
+    
+    nav {
+      display: flex;
+      align-items: center;
+    }
+    
+    nav a {
+      margin: 0 1rem;
+      text-decoration: none;
+      color: var(--dark);
+      font-weight: 500;
+      position: relative;
+      padding: 0.5rem 0;
+      transition: var(--transition);
+    }
+    
+    nav a:hover {
+      color: var(--primary);
+    }
+    
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--primary);
+      transition: var(--transition);
+    }
+    
+    nav a:hover::after {
+      width: 100%;
+    }
+    
+    .profile {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+    }
+    
+    .profile:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(67, 97, 238, 0.4);
+    }
+    
+    .container {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-top: 6rem;
+    }
+    
+    .box {
+      background: white;
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      width: 100%;
+      max-width: 400px;
+      margin: 2rem auto;
+      box-shadow: var(--box-shadow);
+      transform: translateY(20px);
+      opacity: 0;
+      transition: var(--transition);
+    }
+    
+    .box.visible {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    .box h2 {
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+      text-align: center;
+      font-weight: 600;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--dark);
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      font-family: 'Poppins', sans-serif;
+      font-size: 1rem;
+      transition: var(--transition);
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    }
+    
+    .btn {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: var(--border-radius);
+      font-family: 'Poppins', sans-serif;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      text-align: center;
+      width: 100%;
+    }
+    
+    .btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+    }
+    
+    .btn-outline {
+      background: transparent;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+    
+    .btn-outline:hover {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .text-center {
+      text-align: center;
+    }
+    
+    .toggle-link {
+      color: var(--primary);
+      cursor: pointer;
+      font-weight: 500;
+      transition: var(--transition);
+      display: inline-block;
+      margin-top: 1rem;
+    }
+    
+    .toggle-link:hover {
+      color: var(--secondary);
+      text-decoration: underline;
+    }
+    
+    /* Home View */
+    #homeView {
+      display: none;
+      opacity: 0;
+      transition: var(--transition);
+    }
+    
+    #homeView.visible {
+      opacity: 1;
+    }
+    
+    .welcome-section {
+      background: white;
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      margin-bottom: 2rem;
+      box-shadow: var(--box-shadow);
+    }
+    
+    .welcome-section h3 {
+      color: var(--primary);
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+    
+    .welcome-section p {
+      color: #666;
+      margin-bottom: 1.5rem;
+    }
+    
+    .card-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    
+    .card {
+      background: white;
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      box-shadow: var(--box-shadow);
+      transition: var(--transition);
+      cursor: pointer;
+      text-align: center;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card i {
+      font-size: 2.5rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+    
+    .card h4 {
+      margin-bottom: 0.5rem;
+      color: var(--dark);
+    }
+    
+    .card p {
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    /* Progress Modal */
+    #progressModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(5px);
+    }
+    
+    .progressBox {
+      background: white;
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      text-align: center;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      transform: scale(0.9);
+      opacity: 0;
+      transition: var(--transition);
+    }
+    
+    .progressBox.visible {
+      transform: scale(1);
+      opacity: 1;
+    }
+    
+    .progressBox h3 {
+      margin-bottom: 1.5rem;
+      color: var(--primary);
+    }
+    
+    .progressBar {
+      width: 100%;
+      background: #f0f0f0;
+      height: 10px;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+    
+    .progressFill {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--primary), var(--success));
+      transition: width 0.3s ease;
+    }
+    
+    .progressText {
+      font-weight: 500;
+      color: var(--dark);
+    }
+    
+    /* Alert */
+    .alert {
+      padding: 1rem;
+      border-radius: var(--border-radius);
+      margin-bottom: 1rem;
+      display: none;
+    }
+    
+    .alert-success {
+      background: rgba(76, 201, 240, 0.2);
+      border-left: 4px solid var(--success);
+      color: #0a6d8c;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease forwards;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      header {
+        padding: 1rem;
+      }
+      
+      nav a {
+        margin: 0 0.5rem;
+        font-size: 0.9rem;
+      }
+      
+      .container {
+        padding: 1rem;
+        padding-top: 5rem;
+      }
+      
+      .box {
+        padding: 1.5rem;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
 
-<header>
-    <div>📚 Exam Portal</div>
-    <nav id="navLinks"></nav>
-    <div id="profilePic" class="profile-pic" style="display:none;"></div>
+<header id="topBar">
+  <div class="logo">
+    <i class="fas fa-graduation-cap"></i>
+    <span>ExamPro</span>
+  </div>
+  <nav id="navLinks"></nav>
+  <div class="profile" id="profilePic" title="Profile"></div>
 </header>
 
-<div id="progressBar"><div></div></div>
-
 <div class="container" id="mainContent">
-    <!-- Login / Signup -->
-    <div class="form-box" id="authForms">
-        <h2>Login</h2>
-        <input type="text" id="loginUsername" placeholder="Username" required>
-        <input type="text" id="loginRoll" placeholder="Roll Number" required>
-        <button onclick="login()">Login</button>
-        <hr>
-        <h2>Sign Up</h2>
-        <input type="text" id="signupName" placeholder="Full Name" required>
-        <input type="text" id="signupUsername" placeholder="Username (no spaces)" required>
-        <input type="date" id="signupDob" required>
-        <button onclick="signup()">Sign Up</button>
+  <!-- Login/Signup Forms -->
+  <div class="box" id="authBox">
+    <h2 id="formTitle">Welcome Back!</h2>
+    <div id="alertBox" class="alert alert-success" style="display: none;"></div>
+    <div id="loginForm">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" class="form-control" placeholder="Enter your username" required>
+      </div>
+      <div class="form-group">
+        <label for="rollNumber">Roll Number</label>
+        <input type="text" id="rollNumber" class="form-control" placeholder="Enter your roll number" required>
+      </div>
+      <button class="btn" onclick="login()">Login</button>
+      <p class="text-center">
+        <span class="toggle-link" onclick="toggle()">Don't have an account? Sign up</span>
+      </p>
     </div>
+    <div id="signupForm" style="display:none;">
+      <div class="form-group">
+        <label for="name">Full Name</label>
+        <input type="text" id="name" class="form-control" placeholder="Enter your full name" required>
+      </div>
+      <div class="form-group">
+        <label for="newUsername">Username</label>
+        <input type="text" id="newUsername" class="form-control" placeholder="Choose a username" required>
+      </div>
+      <div class="form-group">
+        <label for="dob">Date of Birth</label>
+        <input type="date" id="dob" class="form-control" required>
+      </div>
+      <button class="btn" onclick="signup()">Create Account</button>
+      <p class="text-center">
+        <span class="toggle-link" onclick="toggle()">Already have an account? Login</span>
+      </p>
+    </div>
+  </div>
 
-    <!-- Dashboard -->
-    <div id="dashboard" style="display:none;">
-        <h2>Welcome, <span id="userName"></span>!</h2>
-        <p id="examStatus"></p>
+  <!-- Home View -->
+  <div id="homeView">
+    <div class="welcome-section">
+      <h3>Welcome back, <span id="userName"></span>!</h3>
+      <p id="examStatusMessage">Ready to take your exam?</p>
+      <div id="examSection"></div>
     </div>
+    
+    <h3 style="margin-bottom: 1rem; color: var(--primary);">Your Resources</h3>
+    <div class="card-container" id="resourceCards">
+      <!-- Cards will be dynamically inserted here -->
+    </div>
+  </div>
 </div>
 
+<!-- Progress Modal -->
+<div id="progressModal">
+  <div class="progressBox">
+    <h3 id="progressTitle">Generating PDF...</h3>
+    <div class="progressBar">
+      <div class="progressFill" id="progressFill"></div>
+    </div>
+    <p class="progressText" id="progressText">0%</p>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-const apiURL = "https://script.google.com/macros/s/AKfycbx-HPTKFkmhd2gJXgd9JFTjcgamCumgLbOseFp0ZLR7EFC-65v7oSIybsEZYnYvnFXHww/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbx-HPTKFkmhd2gJXgd9JFTjcgamCumgLbOseFp0ZLR7EFC-65v7oSIybsEZYnYvnFXHww/exec";
 const { jsPDF } = window.jspdf;
 
-// Progress bar control
-function showProgress() {
-    const bar = document.querySelector("#progressBar");
-    const fill = bar.querySelector("div");
-    bar.style.display = "block";
-    fill.style.width = "0%";
-    let progress = 0;
-    const interval = setInterval(() => {
-        progress += 10;
-        fill.style.width = progress + "%";
-        if (progress >= 100) clearInterval(interval);
-    }, 50);
+// Initialize the app
+document.addEventListener('DOMContentLoaded', function() {
+  // Show elements with animation
+  setTimeout(() => {
+    document.getElementById('authBox').classList.add('visible');
+    document.getElementById('topBar').classList.add('visible');
+  }, 100);
+  
+  const user = JSON.parse(localStorage.getItem("user"));
+  if(user){ 
+    setTimeout(() => {
+      renderHome();
+    }, 300);
+  }
+});
+
+// Toggle Login / Signup
+function toggle(){
+  let loginForm = document.getElementById("loginForm");
+  let signupForm = document.getElementById("signupForm");
+  let title = document.getElementById("formTitle");
+  
+  if(loginForm.style.display === "none"){
+    loginForm.style.display = "block";
+    signupForm.style.display = "none";
+    title.innerText = "Welcome Back!";
+  } else {
+    loginForm.style.display = "none";
+    signupForm.style.display = "block";
+    title.innerText = "Create Account";
+  }
+  
+  // Reset form fields
+  document.getElementById("username").value = "";
+  document.getElementById("rollNumber").value = "";
+  document.getElementById("name").value = "";
+  document.getElementById("newUsername").value = "";
+  document.getElementById("dob").value = "";
 }
-function hideProgress() { document.querySelector("#progressBar").style.display = "none"; }
+
+// Show alert message
+function showAlert(message, type = 'success') {
+  const alertBox = document.getElementById('alertBox');
+  alertBox.textContent = message;
+  alertBox.className = `alert alert-${type}`;
+  alertBox.style.display = 'block';
+  
+  setTimeout(() => {
+    alertBox.style.display = 'none';
+  }, 5000);
+}
 
 // Login
-function login() {
-    let username = document.getElementById("loginUsername").value.trim();
-    let roll = document.getElementById("loginRoll").value.trim();
-    if (!username || !roll) return alert("Fill all fields");
-
-    fetch(`${apiURL}?action=login&username=${username}&roll=${roll}`)
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            localStorage.setItem("user", JSON.stringify(data.user));
-            loadDashboard();
-        } else {
-            alert("Invalid credentials");
-        }
-    });
+function login(){
+  const username = document.getElementById("username").value.trim();
+  const rollNumber = document.getElementById("rollNumber").value.trim();
+  
+  if(!username || !rollNumber) {
+    showAlert('Please fill in all fields', 'danger');
+    return;
+  }
+  
+  showProgress('Authenticating...');
+  
+  fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ 
+      action: "login", 
+      username: username, 
+      rollNumber: rollNumber 
+    })
+  })
+  .then(response => {
+    if(!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  })
+  .then(res => {
+    hideProgress();
+    if(res.success){
+      localStorage.setItem("user", JSON.stringify({ ...res, rollNumber: rollNumber }));
+      showAlert('Login successful! Redirecting...');
+      setTimeout(() => {
+        renderHome();
+      }, 1500);
+    } else {
+      showAlert('Invalid credentials. Please try again.', 'danger');
+    }
+  })
+  .catch(error => {
+    hideProgress();
+    showAlert('An error occurred. Please try again later.', 'danger');
+    console.error('Error:', error);
+  });
 }
 
 // Signup
-function signup() {
-    let name = document.getElementById("signupName").value.trim();
-    let username = document.getElementById("signupUsername").value.trim();
-    let dob = document.getElementById("signupDob").value;
-    if (!name || !username || !dob) return alert("Fill all fields");
-
-    let roll = dob.split("-")[0] + new Date().getDate();
-    fetch(apiURL, {
-        method: "POST",
-        body: JSON.stringify({ action: "signup", name, username, dob, roll })
+function signup(){
+  const name = document.getElementById("name").value.trim();
+  const username = document.getElementById("newUsername").value.trim();
+  const dob = document.getElementById("dob").value;
+  
+  if(!name || !username || !dob) {
+    showAlert('Please fill in all fields', 'danger');
+    return;
+  }
+  
+  showProgress('Creating account...');
+  
+  fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ 
+      action: "signup", 
+      name: name, 
+      username: username, 
+      dob: dob 
     })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            localStorage.setItem("user", JSON.stringify({ name, username, roll, attempted: false }));
-            loadDashboard();
-        } else {
-            alert("Signup failed");
-        }
-    });
+  })
+  .then(response => {
+    if(!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  })
+  .then(res => {
+    hideProgress();
+    if(res.success){
+      showAlert(`Account created successfully! Your Roll Number is: ${res.rollNumber}`, 'success');
+      // Auto-fill login form after signup
+      document.getElementById("username").value = username;
+      document.getElementById("rollNumber").value = res.rollNumber;
+      toggle();
+    } else {
+      showAlert(res.message || 'Account creation failed. Please try again.', 'danger');
+    }
+  })
+  .catch(error => {
+    hideProgress();
+    showAlert('An error occurred. Please try again later.', 'danger');
+    console.error('Error:', error);
+  });
 }
 
-// Load dashboard
-function loadDashboard() {
-    let user = JSON.parse(localStorage.getItem("user"));
-    if (!user) return;
-    document.getElementById("authForms").style.display = "none";
-    document.getElementById("dashboard").style.display = "block";
-    document.getElementById("userName").innerText = user.name;
-    document.getElementById("profilePic").style.display = "flex";
-    document.getElementById("profilePic").innerText = user.name.charAt(0).toUpperCase();
-
-    fetch(`${apiURL}?action=checkAttempt&username=${user.username}&roll=${user.roll}`)
-    .then(res => res.json())
-    .then(data => {
-        let attempted = data.attempted;
-        user.attempted = attempted;
-        localStorage.setItem("user", JSON.stringify(user));
-        let navHTML = `<a href="#" onclick="downloadAllResults()">Results</a>`;
-        if (!attempted) {
-            navHTML += `<a href="exam.html">Attempt Test</a>`;
-        } else {
-            navHTML += `<a href="#" onclick="downloadMyResults()">My Results</a>`;
-            navHTML += `<a href="#" onclick="downloadCertificate()">Certificate</a>`;
-        }
-        navHTML += `<a href="#" onclick="signout()">Signout</a>`;
-        document.getElementById("navLinks").innerHTML = navHTML;
-        document.getElementById("examStatus").innerText = attempted ? "You have already attempted the exam." : "You can attempt the exam now.";
-    });
-}
-
-// PDF functions
-function downloadAllResults() {
-    showProgress();
-    fetch(`${apiURL}?action=getResults`)
-    .then(res => res.json())
-    .then(data => {
-        hideProgress();
-        const doc = new jsPDF();
-        doc.text("All Results", 10, 10);
-        let y = 20;
-        data.results.forEach(r => {
-            doc.text(`${r.name} - ${r.roll} - ${r.marks}`, 10, y);
-            y += 10;
-        });
-        doc.save("all_results.pdf");
-    });
-}
-function downloadMyResults() {
-    let user = JSON.parse(localStorage.getItem("user"));
-    showProgress();
-    fetch(`${apiURL}?action=getMyResult&username=${user.username}&roll=${user.roll}`)
-    .then(res => res.json())
-    .then(data => {
-        hideProgress();
-        const doc = new jsPDF();
-        doc.text("My Detailed Results", 10, 10);
-        let y = 20;
-        data.details.forEach(d => {
-            doc.text(`${d.question} - Your: ${d.yourAnswer} - Correct: ${d.correctAnswer}`, 10, y);
-            y += 10;
-        });
-        doc.save("my_results.pdf");
-    });
-}
-function downloadCertificate() {
-    let user = JSON.parse(localStorage.getItem("user"));
-    showProgress();
-    fetch(`${apiURL}?action=getCertificate&username=${user.username}&roll=${user.roll}`)
-    .then(res => res.json())
-    .then(data => {
-        hideProgress();
-        const doc = new jsPDF();
-        doc.setFontSize(20);
-        doc.text("Certificate of Achievement", 40, 40);
-        doc.setFontSize(14);
-        doc.text(`This is to certify that ${user.name} has successfully completed the exam.`, 20, 60);
-        doc.text(`Score: ${data.score}`, 20, 80);
-        doc.save("certificate.pdf");
-    });
-}
-
-function signout() {
-    localStorage.removeItem("user");
+// Logout
+function logout(){
+  localStorage.removeItem("user");
+  // Show login form with animation
+  document.getElementById('homeView').classList.remove('visible');
+  document.getElementById('authBox').style.display = 'block';
+  document.getElementById('loginForm').style.display = 'block';
+  document.getElementById('signupForm').style.display = 'none';
+  document.getElementById('formTitle').innerText = 'Welcome Back!';
+  document.getElementById('topBar').style.display = 'none';
+  
+  setTimeout(() => {
+    document.getElementById('authBox').classList.add('visible');
     location.reload();
+  }, 300);
 }
 
-// On load
-if (localStorage.getItem("user")) {
-    loadDashboard();
+// Progress Modal
+function showProgress(title = 'Processing...') {
+  document.getElementById("progressTitle").textContent = title;
+  document.getElementById("progressModal").style.display = "flex";
+  document.getElementById("progressFill").style.width = "0%";
+  document.getElementById("progressText").textContent = "0%";
+  
+  // Add visible class after display is set to flex
+  setTimeout(() => {
+    document.querySelector('.progressBox').classList.add('visible');
+  }, 10);
+  
+  // Simulate progress if it takes too long
+  let progress = 0;
+  let interval = setInterval(() => {
+    if(progress < 50){
+      progress += 5;
+      document.getElementById("progressFill").style.width = progress + "%";
+      document.getElementById("progressText").textContent = progress + "%";
+    } else {
+      clearInterval(interval);
+    }
+  }, 200);
+}
+
+function hideProgress() {
+  document.getElementById("progressFill").style.width = "100%";
+  document.getElementById("progressText").textContent = "100%";
+  
+  setTimeout(() => {
+    document.querySelector('.progressBox').classList.remove('visible');
+    setTimeout(() => {
+      document.getElementById("progressModal").style.display = "none";
+    }, 300);
+  }, 500);
+}
+
+// PDF: All Results
+function downloadAllResults(){
+  showProgress('Generating All Results PDF...');
+  
+  fetch(API_URL, { 
+    method: "POST", 
+    body: JSON.stringify({ action: "getAllResults" }) 
+  })
+  .then(response => {
+    if(!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  })
+  .then(data => {
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.setFontSize(20);
+    doc.setTextColor(67, 97, 238);
+    doc.text("ExamPro - All Results", 105, 15, null, null, 'center');
+    
+    // Add subtitle
+    doc.setFontSize(12);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 105, 22, null, null, 'center');
+    
+    // Add line
+    doc.setDrawColor(67, 97, 238);
+    doc.setLineWidth(0.5);
+    doc.line(20, 25, 190, 25);
+    
+    // Set table headers
+    const headers = [["Rank", "Name", "Roll No", "Score", "Percentage"]];
+    const rows = data.map((row, index) => [
+      index + 1,
+      row.name,
+      row.rollNumber,
+      `${row.marks}/${row.totalMarks}`,
+      `${Math.round((row.marks / row.totalMarks) * 100)}%`
+    ]);
+    
+    // Add table
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    doc.autoTable({
+      startY: 30,
+      head: headers,
+      body: rows,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [67, 97, 238],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold'
+      },
+      alternateRowStyles: {
+        fillColor: [240, 240, 255]
+      },
+      margin: { top: 30 }
+    });
+    
+    // Add footer
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.text("© ExamPro - All rights reserved", 105, 285, null, null, 'center');
+    
+    hideProgress();
+    doc.save("ExamPro_All_Results.pdf");
+  })
+  .catch(error => {
+    hideProgress();
+    showAlert('Failed to generate PDF. Please try again.', 'danger');
+    console.error('Error:', error);
+  });
+}
+
+// PDF: My Detailed Results
+function downloadMyResults(){
+  showProgress('Generating Your Detailed Results...');
+  const user = JSON.parse(localStorage.getItem("user"));
+  
+  fetch(API_URL, { 
+    method: "POST", 
+    body: JSON.stringify({ 
+      action: "getMyResults", 
+      rollNumber: user.rollNumber 
+    }) 
+  })
+  .then(response => {
+    if(!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  })
+  .then(data => {
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.setFontSize(20);
+    doc.setTextColor(67, 97, 238);
+    doc.text(`${user.name}'s Exam Results`, 105, 15, null, null, 'center');
+    
+    // Add subtitle
+    doc.setFontSize(12);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Roll Number: ${user.rollNumber} | Date: ${new Date().toLocaleDateString()}`, 105, 22, null, null, 'center');
+    
+    // Add line
+    doc.setDrawColor(67, 97, 238);
+    doc.setLineWidth(0.5);
+    doc.line(20, 25, 190, 25);
+    
+    // Add results summary
+    let totalQuestions = data.length;
+    let correctAnswers = data.filter(q => q.answer === q.correctAnswer).length;
+    let scorePercentage = Math.round((correctAnswers / totalQuestions) * 100);
+    
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Total Questions: ${totalQuestions}`, 20, 35);
+    doc.text(`Correct Answers: ${correctAnswers}`, 20, 42);
+    doc.text(`Score: ${scorePercentage}%`, 20, 49);
+    
+    // Add detailed questions
+    let y = 60;
+    doc.setFontSize(14);
+    doc.setTextColor(67, 97, 238);
+    doc.text("Detailed Results:", 20, y);
+    y += 10;
+    
+    doc.setFontSize(10);
+    data.forEach((q, i) => {
+      if(y > 260) {
+        doc.addPage();
+        y = 20;
+      }
+      
+      doc.setTextColor(0, 0, 0);
+      doc.setFontStyle('bold');
+      doc.text(`${i+1}. ${q.question}`, 20, y);
+      y += 7;
+      
+      doc.setFontStyle('normal');
+      doc.setTextColor(q.answer === q.correctAnswer ? [0, 150, 0] : [150, 0, 0]);
+      doc.text(`Your Answer: ${q.answer}`, 25, y);
+      y += 7;
+      
+      doc.setTextColor(0, 150, 0);
+      doc.text(`Correct Answer: ${q.correctAnswer}`, 25, y);
+      y += 10;
+    });
+    
+    // Add footer
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.text("© ExamPro - Confidential Report", 105, 285, null, null, 'center');
+    
+    hideProgress();
+    doc.save(`ExamPro_${user.name}_Detailed_Results.pdf`);
+  })
+  .catch(error => {
+    hideProgress();
+    showAlert('Failed to generate PDF. Please try again.', 'danger');
+    console.error('Error:', error);
+  });
+}
+
+// PDF: Certificate
+function downloadCertificate(){
+  showProgress('Generating Your Certificate...');
+  const user = JSON.parse(localStorage.getItem("user"));
+  
+  fetch(API_URL, { 
+    method: "POST", 
+    body: JSON.stringify({ 
+      action: "getUserScore", 
+      rollNumber: user.rollNumber 
+    }) 
+  })
+  .then(response => {
+    if(!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  })
+  .then(res => {
+    const doc = new jsPDF({ 
+      orientation: "landscape",
+      unit: 'mm'
+    });
+    
+    // Add background
+    doc.setFillColor(245, 247, 255);
+    doc.rect(0, 0, 297, 210, 'F');
+    
+    // Add border
+    doc.setDrawColor(67, 97, 238);
+    doc.setLineWidth(1);
+    doc.rect(10, 10, 277, 190);
+    
+    // Add decorative elements
+    doc.setFillColor(67, 97, 238);
+    doc.roundedRect(20, 20, 257, 170, 5, 5, 'F');
+    
+    // Add title
+    doc.setFontSize(36);
+    doc.setTextColor(255, 255, 255);
+    doc.text("CERTIFICATE OF ACHIEVEMENT", 148.5, 50, null, null, 'center');
+    
+    // Add subtitle
+    doc.setFontSize(18);
+    doc.text("This Certificate is Proudly Presented to", 148.5, 70, null, null, 'center');
+    
+    // Add name
+    doc.setFontSize(28);
+    doc.setFontStyle('bold');
+    doc.text(user.name.toUpperCase(), 148.5, 90, null, null, 'center');
+    
+    // Add achievement text
+    doc.setFontSize(16);
+    doc.setFontStyle('normal');
+    doc.text(`For successfully completing the examination with a score of ${res.marks}/${res.totalMarks}`, 148.5, 110, null, null, 'center');
+    
+    // Add date
+    doc.text(`Date: ${new Date().toLocaleDateString()}`, 148.5, 130, null, null, 'center');
+    
+    // Add seal
+    doc.setFillColor(255, 255, 255);
+    doc.circle(148.5, 160, 20, 'F');
+    doc.setFontSize(12);
+    doc.setTextColor(67, 97, 238);
+    doc.text("ExamPro", 148.5, 155, null, null, 'center');
+    doc.setFontSize(8);
+    doc.text("Official Seal", 148.5, 160, null, null, 'center');
+    
+    // Add footer
+    doc.setFontSize(10);
+    doc.setTextColor(255, 255, 255);
+    doc.text("© ExamPro - All rights reserved", 148.5, 190, null, null, 'center');
+    
+    hideProgress();
+    doc.save(`ExamPro_Certificate_${user.name}.pdf`);
+  })
+  .catch(error => {
+    hideProgress();
+    showAlert('Failed to generate certificate. Please try again.', 'danger');
+    console.error('Error:', error);
+  });
+}
+
+// Render Home
+function renderHome(){
+  const user = JSON.parse(localStorage.getItem("user"));
+  if(!user) return;
+  
+  // Hide auth box and show home view with animation
+  document.getElementById('authBox').classList.remove('visible');
+  setTimeout(() => {
+    document.getElementById('authBox').style.display = 'none';
+    document.getElementById('homeView').style.display = 'block';
+    setTimeout(() => {
+      document.getElementById('homeView').classList.add('visible');
+    }, 50);
+  }, 300);
+  
+  document.getElementById("topBar").style.display = "flex";
+  document.getElementById("userName").textContent = user.name;
+  document.getElementById("profilePic").textContent = user.name.charAt(0).toUpperCase();
+
+  fetch(API_URL, { 
+    method: "POST", 
+    body: JSON.stringify({ 
+      action: "checkAttempt", 
+      rollNumber: user.rollNumber 
+    }) 
+  })
+  .then(response => {
+    if(!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  })
+  .then(res => {
+    let nav = document.getElementById("navLinks");
+    let examSection = document.getElementById("examSection");
+    let resourceCards = document.getElementById("resourceCards");
+    let examStatusMessage = document.getElementById("examStatusMessage");
+    
+    if(res.attempted){
+      nav.innerHTML = `
+        <a onclick="downloadAllResults()"><i class="fas fa-list-alt"></i> Results</a>
+        <a onclick="downloadMyResults()"><i class="fas fa-file-alt"></i> My Results</a>
+        <a onclick="downloadCertificate()"><i class="fas fa-award"></i> Certificate</a>
+        <a onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+      `;
+      
+      examStatusMessage.textContent = "You have completed your exam. View your results below.";
+      examSection.innerHTML = `
+        <div style="text-align: center; margin-top: 2rem;">
+          <p style="color: #666; margin-bottom: 1rem;">Exam completed on ${new Date(res.timestamp).toLocaleDateString()}</p>
+          <button class="btn" onclick="downloadMyResults()">
+            <i class="fas fa-download"></i> Download Detailed Results
+          </button>
+        </div>
+      `;
+      
+      resourceCards.innerHTML = `
+        <div class="card" onclick="downloadAllResults()">
+          <i class="fas fa-list-ol"></i>
+          <h4>All Results</h4>
+          <p>Download complete results of all students</p>
+        </div>
+        <div class="card" onclick="downloadMyResults()">
+          <i class="fas fa-file-alt"></i>
+          <h4>My Detailed Results</h4>
+          <p>View your answers and correct solutions</p>
+        </div>
+        <div class="card" onclick="downloadCertificate()">
+          <i class="fas fa-award"></i>
+          <h4>Certificate</h4>
+          <p>Download your achievement certificate</p>
+        </div>
+      `;
+    } else {
+      nav.innerHTML = `
+        <a onclick="downloadAllResults()"><i class="fas fa-list-alt"></i> Results</a>
+        <a onclick="window.location.href='exam.html'"><i class="fas fa-pen"></i> Attempt Test</a>
+        <a onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+      `;
+      
+      examStatusMessage.textContent = "You have not attempted the exam yet. Click below to start.";
+      examSection.innerHTML = `
+        <div style="text-align: center; margin-top: 2rem;">
+          <button class="btn" onclick="location.href='exam.html'">
+            <i class="fas fa-play"></i> Start Exam
+          </button>
+        </div>
+      `;
+      
+      resourceCards.innerHTML = `
+        <div class="card" onclick="downloadAllResults()">
+          <i class="fas fa-list-ol"></i>
+          <h4>All Results</h4>
+          <p>View results of all students</p>
+        </div>
+        <div class="card" onclick="window.location.href='exam.html'">
+          <i class="fas fa-pen"></i>
+          <h4>Take Exam</h4>
+          <p>Start your examination</p>
+        </div>
+        <div class="card" onclick="logout()">
+          <i class="fas fa-sign-out-alt"></i>
+          <h4>Sign Out</h4>
+          <p>Logout from your account</p>
+        </div>
+      `;
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    showAlert('Failed to load exam data. Please try again.', 'danger');
+  });
 }
 </script>
 </body>
