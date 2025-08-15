@@ -1,113 +1,135 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Exam System</title>
-    <link rel="stylesheet" href="css/style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <title>Exam System</title>
+  <style>
+    body { font-family: Arial; margin: 0; background: #f5f5f5; }
+    header { background: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; }
+    .profile { width: 40px; height: 40px; border-radius: 50%; background: #4CAF50; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; }
+    .container { padding: 20px; }
+    .box { background: white; padding: 20px; border-radius: 8px; width: 300px; margin: 50px auto; }
+    input, button { width: 100%; padding: 8px; margin: 5px 0; }
+    button { background: #4CAF50; color: white; border: none; cursor: pointer; }
+    button:hover { background: #45a049; }
+  </style>
 </head>
 <body>
-    <!-- Top Navigation -->
-    <nav class="navbar">
-        <div class="navbar-brand">
-            <img src="assets/logo.png" alt="Logo" class="logo"> <!-- Optional logo -->
-            <span>Exam System</span>
-        </div>
-        <div class="nav-links" id="navLinks">
-            <a href="#" id="homeLink" class="hidden">Home</a>
-            <a href="#" id="resultsLink" class="hidden">Results</a>
-            <a href="#" id="myResultsLink" class="hidden">My Result</a>
-            <a href="#" id="paperLink" class="hidden">Paper</a>
-            <a href="#" id="certificateLink" class="hidden">Certificate</a>
-            <a href="#" id="attemptExamLink" class="hidden">Attempt Exam</a>
-        </div>
-        <div class="profile-container hidden" id="profileContainer">
-            <div class="profile-icon" id="profileIcon"></div>
-            <div class="profile-dropdown hidden" id="profileDropdown">
-                <div class="profile-info">
-                    <p id="profileName"></p>
-                    <p id="profileRoll"></p>
-                </div>
-                <button id="logoutBtn">Sign Out</button>
-            </div>
-        </div>
-    </nav>
 
-    <!-- Main Content -->
-    <div class="container">
-        <!-- Registration -->
-        <div class="auth-box" id="registerBox">
-            <h2>Create Account</h2>
-            <input type="text" id="name" placeholder="Full Name" required>
-            <input type="text" id="username" placeholder="Username (no spaces)" required>
-            <input type="date" id="dob" required>
-            <button id="registerBtn">Create Account</button>
-            <p class="auth-switch">Already have an account? <a href="#" id="showLogin">Login</a></p>
-        </div>
+<header id="topBar" style="display:none;">
+  <h2>Exam System</h2>
+  <div class="profile" id="profilePic"></div>
+</header>
 
-        <!-- Login -->
-        <div class="auth-box hidden" id="loginBox">
-            <h2>Login</h2>
-            <input type="text" id="loginUsername" placeholder="Username" required>
-            <input type="text" id="loginRoll" placeholder="Roll Number" required>
-            <button id="loginBtn">Login</button>
-            <p class="auth-switch">Don't have an account? <a href="#" id="showRegister">Register</a></p>
-        </div>
-
-        <!-- Home/Dashboard -->
-        <div class="dashboard hidden" id="dashboard">
-            <h2>Welcome, <span id="welcomeName"></span></h2>
-            <div class="dashboard-cards">
-                <div class="card" id="attemptCard">
-                    <h3>Seerat-e-Mustafa Exam</h3>
-                    <p>Attempt the exam to test your knowledge</p>
-                    <button id="attemptExamBtn">Attempt Exam</button>
-                </div>
-                <div class="card" id="resultCard">
-                    <h3>My Results</h3>
-                    <p>View your detailed results</p>
-                    <button id="viewResultsBtn">View Results</button>
-                </div>
-                <div class="card" id="certificateCard">
-                    <h3>Certificate</h3>
-                    <p>Download your certificate</p>
-                    <button id="downloadCertBtn">Download</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Exam -->
-        <div class="exam-container hidden" id="examBox">
-            <h2 id="examTitle">Exam: Seerat-e-Mustafa</h2>
-            <div class="exam-info">
-                <p>Time: 30 minutes | Questions: <span id="totalQuestions">0</span></p>
-                <p id="timer">Time Left: 30:00</p>
-            </div>
-            <form id="examForm"></form>
-            <div class="exam-actions">
-                <button id="submitExamBtn">Submit Exam</button>
-            </div>
-        </div>
-
-        <!-- Results -->
-        <div class="result-container hidden" id="resultBox">
-            <h2>Your Result</h2>
-            <div class="result-summary">
-                <p id="resultText"></p>
-                <div class="result-details" id="resultDetails"></div>
-            </div>
-            <div class="result-actions">
-                <button id="downloadResultBtn">Download Detailed Result</button>
-                <button id="downloadCertBtn2">Download Certificate</button>
-                <button id="backToDashboardBtn">Back to Dashboard</button>
-            </div>
-        </div>
+<div class="container" id="mainContent">
+  <!-- Login/Signup Forms -->
+  <div class="box" id="authBox">
+    <h2 id="formTitle">Login</h2>
+    <div id="loginForm">
+      <input type="text" id="username" placeholder="Username" required>
+      <input type="text" id="rollNumber" placeholder="Roll Number" required>
+      <button onclick="login()">Login</button>
     </div>
+    <div id="signupForm" style="display:none;">
+      <input type="text" id="name" placeholder="Full Name" required>
+      <input type="text" id="newUsername" placeholder="Username" required>
+      <input type="date" id="dob" required>
+      <button onclick="signup()">Create Account</button>
+    </div>
+    <p id="toggleForm" style="cursor:pointer;color:blue;" onclick="toggle()">Create new account</p>
+  </div>
 
-    <script src="js/utils.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/exam.js"></script>
-    <script src="js/main.js"></script>
+  <!-- Home View -->
+  <div id="homeView" style="display:none;">
+    <h3>Welcome <span id="userName"></span>!</h3>
+    <div id="examSection"></div>
+    <button onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbx-HPTKFkmhd2gJXgd9JFTjcgamCumgLbOseFp0ZLR7EFC-65v7oSIybsEZYnYvnFXHww/exec";
+
+// Toggle Login / Signup
+function toggle(){
+  let loginForm = document.getElementById("loginForm");
+  let signupForm = document.getElementById("signupForm");
+  let title = document.getElementById("formTitle");
+  if(loginForm.style.display === "none"){
+    loginForm.style.display = "block";
+    signupForm.style.display = "none";
+    title.innerText = "Login";
+    document.getElementById("toggleForm").innerText = "Create new account";
+  } else {
+    loginForm.style.display = "none";
+    signupForm.style.display = "block";
+    title.innerText = "Signup";
+    document.getElementById("toggleForm").innerText = "Already have an account? Login";
+  }
+}
+
+// Login Function
+function login(){
+  fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "login", username: document.getElementById("username").value, rollNumber: document.getElementById("rollNumber").value })
+  }).then(r=>r.json()).then(res=>{
+    if(res.success){
+      localStorage.setItem("user", JSON.stringify({ ...res, rollNumber: document.getElementById("rollNumber").value }));
+      renderHome();
+    } else alert("Invalid credentials");
+  });
+}
+
+// Signup Function
+function signup(){
+  fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "signup", name: document.getElementById("name").value, username: document.getElementById("newUsername").value, dob: document.getElementById("dob").value })
+  }).then(r=>r.json()).then(res=>{
+    if(res.success){
+      alert("Account created! Your Roll No: " + res.rollNumber);
+      toggle();
+    }
+  });
+}
+
+// Logout
+function logout(){
+  localStorage.removeItem("user");
+  location.reload();
+}
+
+// Render Home View
+function renderHome(){
+  const user = JSON.parse(localStorage.getItem("user"));
+  if(!user) return;
+
+  document.getElementById("authBox").style.display = "none";
+  document.getElementById("homeView").style.display = "block";
+  document.getElementById("topBar").style.display = "flex";
+  document.getElementById("userName").innerText = user.name;
+  document.getElementById("profilePic").innerText = user.name.charAt(0).toUpperCase();
+
+  // Check Attempt
+  fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "checkAttempt", rollNumber: user.rollNumber })
+  }).then(r=>r.json()).then(res=>{
+    if(res.attempted){
+      document.getElementById("examSection").innerHTML = `<p>You already attempted the exam. <a href="exam.html?view=result">View Result</a></p>`;
+    } else {
+      document.getElementById("examSection").innerHTML = `<button onclick="location.href='exam.html'">Attempt Exam</button>`;
+    }
+  });
+}
+
+// On Page Load
+window.onload = function(){
+  const user = JSON.parse(localStorage.getItem("user"));
+  if(user){
+    renderHome();
+  }
+};
+</script>
 </body>
 </html>
