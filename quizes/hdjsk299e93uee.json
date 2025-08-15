@@ -1,0 +1,31 @@
+{
+  "quizId": "hdjsk299e93uee",
+  "title": "Seerat-e-Mustafa",
+  "questions": [
+    {
+      "question": "In which city was the Prophet Muhammad (PBUH) born?",
+      "options": ["Makkah", "Madinah", "Taif", "Jeddah"],
+      "answer": "Makkah"
+    },
+    {
+      "question": "What was the name of the Prophet Muhammad's (PBUH) father?",
+      "options": ["Abdullah", "Abu Talib", "Hamza", "Umar"],
+      "answer": "Abdullah"
+    },
+    {
+      "question": "At what age did the Prophet Muhammad (PBUH) receive his first revelation?",
+      "options": ["25", "30", "35", "40"],
+      "answer": "40"
+    },
+    {
+      "question": "What was the name of the Prophet Muhammad's (PBUH) first wife?",
+      "options": ["Aisha", "Khadijah", "Hafsa", "Zainab"],
+      "answer": "Khadijah"
+    },
+    {
+      "question": "Which event marks the migration of the Prophet Muhammad (PBUH) from Makkah to Madinah?",
+      "options": ["Battle of Badr", "Hijrah", "Conquest of Makkah", "Treaty of Hudaybiyyah"],
+      "answer": "Hijrah"
+    }
+  ]
+}
