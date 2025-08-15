@@ -5,129 +5,211 @@
 <title>Online Exam System</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-body { font-family: Arial, sans-serif; background: #f2f2f2; padding: 20px; }
-.container { max-width: 700px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; }
+.container { max-width: 750px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
 input, button { padding: 10px; margin: 5px 0; width: 100%; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-button { background: #28a745; color: #fff; cursor: pointer; border: none; }
+button { background: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; }
 button:hover { background: #218838; }
+button:disabled { background: #cccccc; cursor: not-allowed; }
 .hidden { display: none; }
-h2, h3 { text-align: center; }
-p { text-align: center; }
-label { display: block; margin: 5px 0; }
+h2, h3 { color: #333; }
+.error { color: #dc3545; margin: 5px 0; }
+.success { color: #28a745; margin: 5px 0; }
+.loading { text-align: center; padding: 10px; }
+.spinner { border: 4px solid rgba(0,0,0,0.1); width: 36px; height: 36px; border-radius: 50%; border-left-color: #09f; animation: spin 1s linear infinite; margin: 10px auto; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.question { margin-bottom: 15px; padding: 10px; background: #f9f9f9; border-radius: 4px; }
+label { display: block; margin: 5px 0; cursor: pointer; }
+input[type="radio"] { width: auto; margin-right: 8px; }
+a { color: #007bff; text-decoration: none; }
+a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Welcome to the Exam System</h2>
+    <h2>Online Exam System</h2>
 
-    <!-- Registration -->
+    <!-- Status Messages -->
+    <div id="statusMessage"></div>
+
+    <!-- Register -->
     <div id="registerBox">
         <h3>Create Account</h3>
-        <input type="text" id="name" placeholder="Full Name">
-        <input type="text" id="username" placeholder="Username (no spaces)">
-        <input type="date" id="dob">
-        <button onclick="registerUser()">Create Account</button>
-        <p>Already have an account? <a href="#" onclick="showLogin()">Login</a></p>
+        <input type="text" id="name" placeholder="Full Name" required>
+        <input type="text" id="username" placeholder="Username (no spaces)" required>
+        <input type="date" id="dob" required>
+        <button id="registerBtn" onclick="registerUser()">Create Account</button>
+        <p>Already have an account? <a href="#" onclick="showLogin()">Login here</a></p>
     </div>
 
     <!-- Login -->
     <div id="loginBox" class="hidden">
         <h3>Login</h3>
-        <input type="text" id="loginUsername" placeholder="Username">
-        <input type="text" id="loginRoll" placeholder="Roll Number">
-        <button onclick="loginUser()">Login</button>
-        <p>Don't have a roll number? <a href="#" onclick="showRegister()">Create New</a></p>
+        <input type="text" id="loginUsername" placeholder="Username" required>
+        <input type="text" id="loginRoll" placeholder="Roll Number" required>
+        <button id="loginBtn" onclick="loginUser()">Login</button>
+        <p>Don't have an account? <a href="#" onclick="showRegister()">Create New</a></p>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loadingBox" class="hidden">
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Processing your request...</p>
+        </div>
     </div>
 
     <!-- Exam -->
     <div id="examBox" class="hidden">
-        <h3>Exam: Seerat-e-Mustafa</h3>
+        <h3 id="examTitle"></h3>
+        <div id="examTime" class="hidden"></div>
         <form id="examForm"></form>
-        <button onclick="submitExam()">Submit Exam</button>
+        <button id="submitExamBtn" onclick="submitExam()">Submit Exam</button>
     </div>
 
     <!-- Results -->
     <div id="resultBox" class="hidden">
         <h3>Your Result</h3>
-        <p id="resultText"></p>
-        <button onclick="downloadCertificate()">Download Certificate</button>
+        <div id="resultDetails"></div>
+        <button id="certificateBtn" onclick="downloadCertificate()">Download Certificate</button>
+        <button id="restartBtn" onclick="showLogin()">Take Another Test</button>
     </div>
 </div>
 
 <script>
-const APP_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL"; // Replace with your deployed Google Apps Script Web App URL
+// Replace with your deployed Web App URL
+const APP_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
 let currentUser = null;
 let quizData = null;
-const QUIZ_ID = 'hdjsk299e93uee'; // Hardcoded quiz ID for Seerat-e-Mustafa
-const QUIZ_JSON_URL = `quizes/${QUIZ_ID}.json`; // Path to your quiz JSON file (assume hosted)
+const quizId = "hdjsk299e93uee"; // Example quiz id
+let timerInterval = null;
 
-// Show Registration
+// Helper functions
+function showLoading(show) {
+    document.getElementById("loadingBox").classList.toggle("hidden", !show);
+}
+
+function showMessage(text, isError = false) {
+    const statusEl = document.getElementById("statusMessage");
+    statusEl.innerHTML = `<div class="${isError ? 'error' : 'success'}">${text}</div>`;
+    setTimeout(() => statusEl.innerHTML = '', 5000);
+}
+
 function showRegister() {
     document.getElementById("registerBox").classList.remove("hidden");
     document.getElementById("loginBox").classList.add("hidden");
     document.getElementById("examBox").classList.add("hidden");
     document.getElementById("resultBox").classList.add("hidden");
+    clearMessage();
 }
 
-// Show Login
 function showLogin() {
-    document.getElementById("loginBox").classList.remove("hidden");
     document.getElementById("registerBox").classList.add("hidden");
+    document.getElementById("loginBox").classList.remove("hidden");
     document.getElementById("examBox").classList.add("hidden");
     document.getElementById("resultBox").classList.add("hidden");
+    clearMessage();
+    currentUser = null;
 }
 
-// Register User
+function clearMessage() {
+    document.getElementById("statusMessage").innerHTML = '';
+}
+
+// Main functions
 function registerUser() {
-    let name = document.getElementById("name").value.trim();
-    let username = document.getElementById("username").value.trim();
-    let dob = document.getElementById("dob").value;
-    if (!name || !username || !dob) return alert("All fields are required");
-    if (/\s/.test(username)) return alert("Username must not contain spaces");
-
+    const name = document.getElementById("name").value.trim();
+    const username = document.getElementById("username").value.trim();
+    const dob = document.getElementById("dob").value;
+    const btn = document.getElementById("registerBtn");
+    
+    if (!name || !username || !dob) {
+        showMessage("All fields are required", true);
+        return;
+    }
+    
+    if (username.includes(" ")) {
+        showMessage("Username must not contain spaces", true);
+        return;
+    }
+    
+    btn.disabled = true;
+    showLoading(true);
+    
     fetch(APP_URL, {
         method: "POST",
-        body: JSON.stringify({ action: "saveUser", name, username, dob }), // No rollNumber, let server generate
-    }).then(r => r.json()).then(res => {
+        body: JSON.stringify({action:"saveUser", name, username, dob})
+    })
+    .then(r => r.json())
+    .then(res => {
         if (res.status === "exists") {
-            alert("Username already exists!");
+            showMessage("Username already exists! Please choose another.", true);
         } else if (res.status === "success") {
-            let rollNumber = res.user.rollNumber;
-            alert(`Account created! Your Roll Number: ${rollNumber}`);
-            generateAdmitCard(name, username, rollNumber, dob);
-            showLogin(); // Redirect to login after registration
+            const rollNumber = res.user.rollNumber;
+            showMessage(`Account created successfully! Your Roll Number: ${rollNumber}`);
+            generateAdmitCard(name, username, rollNumber);
+            showLogin();
+            document.getElementById("loginRoll").value = rollNumber;
         } else {
-            alert("Error: " + (res.message || "Unknown error"));
+            showMessage(res.message || "Registration failed", true);
         }
-    }).catch(err => alert("Network error: " + err));
+    })
+    .catch(err => {
+        showMessage("Network error. Please try again.", true);
+        console.error(err);
+    })
+    .finally(() => {
+        btn.disabled = false;
+        showLoading(false);
+    });
 }
 
-// Login User
 function loginUser() {
-    let username = document.getElementById("loginUsername").value.trim();
-    let rollNumber = document.getElementById("loginRoll").value.trim();
-    if (!username || !rollNumber) return alert("Username and Roll Number are required");
-
+    const username = document.getElementById("loginUsername").value.trim();
+    const rollNumber = document.getElementById("loginRoll").value.trim();
+    const btn = document.getElementById("loginBtn");
+    
+    if (!username || !rollNumber) {
+        showMessage("Both username and roll number are required", true);
+        return;
+    }
+    
+    btn.disabled = true;
+    showLoading(true);
+    
     fetch(APP_URL, {
         method: "POST",
-        body: JSON.stringify({ action: "login", username, rollNumber })
-    }).then(r => r.json()).then(res => {
+        body: JSON.stringify({action:"login", username, rollNumber})
+    })
+    .then(r => r.json())
+    .then(res => {
         if (res.status === "success") {
             currentUser = res.user;
             checkAttempt();
         } else {
-            alert("Invalid credentials");
+            showMessage("Invalid username or roll number", true);
         }
-    }).catch(err => alert("Network error: " + err));
+    })
+    .catch(err => {
+        showMessage("Login failed. Please try again.", true);
+        console.error(err);
+    })
+    .finally(() => {
+        btn.disabled = false;
+        showLoading(false);
+    });
 }
 
-// Check if already attempted
 function checkAttempt() {
+    showLoading(true);
+    
     fetch(APP_URL, {
         method: "POST",
-        body: JSON.stringify({ action: "checkAttempt", rollNumber: currentUser.rollNumber, quizId: QUIZ_ID })
-    }).then(r => r.json()).then(res => {
+        body: JSON.stringify({action:"checkAttempt", rollNumber: currentUser.rollNumber, quizId})
+    })
+    .then(r => r.json())
+    .then(res => {
         if (res.status === "success") {
             if (res.attempted) {
                 showResults(res.result);
@@ -135,165 +217,309 @@ function checkAttempt() {
                 loadExam();
             }
         } else {
-            alert("Error checking attempt: " + (res.message || "Unknown error"));
+            showMessage("Error checking attempt status", true);
         }
-    }).catch(err => alert("Network error: " + err));
+    })
+    .catch(err => {
+        showMessage("Network error. Please try again.", true);
+        console.error(err);
+    })
+    .finally(() => {
+        showLoading(false);
+    });
 }
 
-// Load Exam
 function loadExam() {
-    fetch(QUIZ_JSON_URL)
-    .then(r => r.json())
-    .then(data => {
-        quizData = data;
-        let form = document.getElementById("examForm");
-        form.innerHTML = "";
-        quizData.questions.forEach((q, i) => {
-            form.innerHTML += `<p>${i + 1}. ${q.question}</p>`;
-            q.options.forEach(opt => {
-                form.innerHTML += `<label><input type="radio" name="q${i}" value="${opt}"> ${opt}</label><br>`;
-            });
-            form.innerHTML += `<br>`;
-        });
-        document.getElementById("loginBox").classList.add("hidden");
-        document.getElementById("examBox").classList.remove("hidden");
-    }).catch(err => alert("Error loading quiz: " + err));
+    showLoading(true);
+    
+    // In a real implementation, you would fetch this from your server
+    // For demo purposes, we'll use sample quiz data
+    const sampleQuiz = {
+        title: "Sample Quiz - Seerat-e-Mustafa",
+        timeLimit: 30, // minutes
+        questions: [
+            {
+                question: "What was the Prophet's (PBUH) father's name?",
+                options: ["Abdullah", "Abu Talib", "Hamza", "Ali"],
+                answer: "Abdullah"
+            },
+            {
+                question: "How old was Prophet Muhammad (PBUH) when he received the first revelation?",
+                options: ["25", "30", "40", "45"],
+                answer: "40"
+            },
+            {
+                question: "Which Surah was revealed first?",
+                options: ["Al-Fatiha", "Al-Baqarah", "Al-Alaq", "Al-Ikhlas"],
+                answer: "Al-Alaq"
+            }
+        ]
+    };
+    
+    // Simulate API call with timeout
+    setTimeout(() => {
+        quizData = sampleQuiz;
+        renderExam();
+        showLoading(false);
+    }, 1000);
+    
+    // In production, use:
+    // fetch(`quizes/${quizId}.json`)
+    // .then(r => r.json())
+    // .then(data => {
+    //     quizData = data;
+    //     renderExam();
+    //     showLoading(false);
+    // })
+    // .catch(err => {
+    //     showMessage("Failed to load exam. Please try again.", true);
+    //     console.error(err);
+    //     showLoading(false);
+    // });
 }
 
-// Submit Exam
+function renderExam() {
+    document.getElementById("examTitle").innerText = quizData.title;
+    
+    if (quizData.timeLimit) {
+        const timeEl = document.getElementById("examTime");
+        timeEl.classList.remove("hidden");
+        timeEl.innerHTML = `Time remaining: <span id="timer">${quizData.timeLimit}:00</span>`;
+        startTimer(quizData.timeLimit * 60); // Convert to seconds
+    }
+    
+    let form = document.getElementById("examForm");
+    form.innerHTML = "";
+    
+    quizData.questions.forEach((q, i) => {
+        const questionEl = document.createElement("div");
+        questionEl.className = "question";
+        questionEl.innerHTML = `<p><strong>Question ${i+1}:</strong> ${q.question}</p>`;
+        
+        q.options.forEach(opt => {
+            questionEl.innerHTML += `
+                <label>
+                    <input type="radio" name="q${i}" value="${opt}" required>
+                    ${opt}
+                </label><br>
+            `;
+        });
+        
+        form.appendChild(questionEl);
+    });
+    
+    document.getElementById("loginBox").classList.add("hidden");
+    document.getElementById("examBox").classList.remove("hidden");
+}
+
+function startTimer(duration) {
+    if (timerInterval) clearInterval(timerInterval);
+    
+    let timer = duration, minutes, seconds;
+    const display = document.getElementById("timer");
+    
+    timerInterval = setInterval(() => {
+        minutes = parseInt(timer / 60, 10);
+        seconds = parseInt(timer % 60, 10);
+        
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+        
+        display.textContent = minutes + ":" + seconds;
+        
+        if (--timer < 0) {
+            clearInterval(timerInterval);
+            submitExam(); // Auto-submit when time expires
+        }
+    }, 1000);
+}
+
 function submitExam() {
-    if (!quizData) return alert("Quiz not loaded");
+    if (timerInterval) clearInterval(timerInterval);
+    
+    // Validate all questions are answered
+    const unanswered = [];
+    quizData.questions.forEach((q, i) => {
+        if (!document.querySelector(`input[name="q${i}"]:checked`)) {
+            unanswered.push(i+1);
+        }
+    });
+    
+    if (unanswered.length > 0) {
+        showMessage(`Please answer all questions. Unanswered: ${unanswered.join(", ")}`, true);
+        return;
+    }
+    
+    // Collect answers
     let answers = [];
     let correct = 0;
+    
     quizData.questions.forEach((q, i) => {
-        let chosen = document.querySelector(`input[name="q${i}"]:checked`);
-        let ans = chosen ? chosen.value : null;
-        let isCorrect = ans === q.answer;
-        answers.push({ question: q.question, yourAnswer: ans, correctAnswer: q.answer, isCorrect });
+        const chosen = document.querySelector(`input[name="q${i}"]:checked`);
+        const ans = chosen ? chosen.value : null;
+        const isCorrect = ans === q.answer;
+        
+        answers.push({
+            question: q.question,
+            yourAnswer: ans,
+            correctAnswer: q.answer,
+            isCorrect: isCorrect
+        });
+        
         if (isCorrect) correct++;
     });
-    let total = quizData.questions.length;
-    let percentage = (correct / total) * 100;
+    
+    const percentage = Math.round((correct / quizData.questions.length) * 100);
+    const btn = document.getElementById("submitExamBtn");
+    
+    btn.disabled = true;
+    showLoading(true);
+    
     fetch(APP_URL, {
         method: "POST",
         body: JSON.stringify({
             action: "saveResults",
-            quizId: QUIZ_ID,
+            quizId,
             rollNumber: currentUser.rollNumber,
             name: currentUser.name,
             username: currentUser.username,
             marks: correct,
-            total,
+            total: quizData.questions.length,
             percentage,
             details: answers
         })
-    }).then(r => r.json()).then(res => {
+    })
+    .then(r => r.json())
+    .then(res => {
         if (res.status === "success") {
-            showResults({ marks: correct, total, percentage });
+            showResults({
+                marks: correct,
+                total: quizData.questions.length,
+                percentage
+            });
         } else if (res.status === "blocked") {
-            alert("You have already attempted this exam.");
-            checkAttempt(); // Refresh to show results
+            showMessage("You have already attempted this exam.", true);
+            showLogin();
         } else {
-            alert("Error saving results: " + (res.message || "Unknown error"));
+            showMessage("Error saving results. Please try again.", true);
         }
-    }).catch(err => alert("Network error: " + err));
+    })
+    .catch(err => {
+        showMessage("Network error. Results not saved.", true);
+        console.error(err);
+    })
+    .finally(() => {
+        btn.disabled = false;
+        showLoading(false);
+    });
 }
 
-// Show Results
 function showResults(result) {
     document.getElementById("examBox").classList.add("hidden");
-    document.getElementById("resultText").innerText = `You scored ${result.marks}/${result.total} (${result.percentage.toFixed(2)}%)`;
+    
+    const resultDetails = document.getElementById("resultDetails");
+    resultDetails.innerHTML = `
+        <p><strong>Name:</strong> ${currentUser.name}</p>
+        <p><strong>Roll No:</strong> ${currentUser.rollNumber}</p>
+        <p><strong>Score:</strong> ${result.marks} out of ${result.total}</p>
+        <p><strong>Percentage:</strong> ${result.percentage}%</p>
+        <p><strong>Status:</strong> ${result.percentage >= 50 ? 'Passed' : 'Failed'}</p>
+    `;
+    
     document.getElementById("resultBox").classList.remove("hidden");
 }
 
-// Generate Admit Card PDF (Premium Design)
-function generateAdmitCard(name, username, rollNumber, dob) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    
-    // Background and Border
-    doc.setFillColor(240, 240, 240);
-    doc.rect(0, 0, 210, 297, 'F'); // A4 size background
-    doc.setDrawColor(0, 0, 0);
-    doc.setLineWidth(1);
-    doc.rect(10, 10, 190, 277); // Outer border
-    
-    // Header
-    doc.setFontSize(24);
-    doc.setFont("helvetica", "bold");
-    doc.text("Admit Card", 105, 30, { align: "center" });
-    
-    // Logo or Watermark (simulated)
-    doc.setFontSize(40);
-    doc.setTextColor(200, 200, 200);
-    doc.text("EXAM SYSTEM", 105, 150, { align: "center", angle: 45 });
-    doc.setTextColor(0, 0, 0);
-    
-    // Details
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "normal");
-    doc.text(`Name: ${name}`, 20, 60);
-    doc.text(`Username: ${username}`, 20, 75);
-    doc.text(`Roll Number: ${rollNumber}`, 20, 90);
-    doc.text(`Date of Birth: ${dob}`, 20, 105);
-    doc.text(`Exam: Seerat-e-Mustafa`, 20, 120);
-    
-    // Footer
-    doc.setFontSize(10);
-    doc.text("This admit card is auto-generated. Keep it safe.", 105, 270, { align: "center" });
-    
-    doc.save("AdmitCard.pdf");
+function generateAdmitCard(name, username, roll) {
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        doc.setFontSize(18);
+        doc.text("ADMIT CARD", 105, 20, { align: 'center' });
+        
+        // Add some styling
+        doc.setDrawColor(0);
+        doc.setLineWidth(0.5);
+        doc.line(20, 25, 190, 25);
+        
+        doc.setFontSize(14);
+        doc.text("Online Exam System", 105, 35, { align: 'center' });
+        
+        // Add photo placeholder
+        doc.rect(140, 45, 50, 60);
+        doc.text("Photo", 165, 80, { align: 'center' });
+        
+        // Student details
+        doc.setFontSize(12);
+        doc.text("Student Details:", 20, 45);
+        doc.text(`Name: ${name}`, 20, 55);
+        doc.text(`Username: ${username}`, 20, 65);
+        doc.text(`Roll Number: ${roll}`, 20, 75);
+        doc.text(`Exam: Seerat-e-Mustafa`, 20, 85);
+        doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 95);
+        
+        // Instructions
+        doc.setFontSize(10);
+        doc.text("Instructions:", 20, 110);
+        doc.text("1. Bring this admit card to the exam center", 20, 120);
+        doc.text("2. Arrive at least 30 minutes before exam time", 20, 130);
+        doc.text("3. No electronic devices allowed", 20, 140);
+        
+        doc.save(`AdmitCard_${roll}.pdf`);
+    } catch (err) {
+        console.error("Error generating admit card:", err);
+        showMessage("Could not generate admit card. Please try again.", true);
+    }
 }
 
-// Generate Certificate PDF (Premium Design)
 function downloadCertificate() {
-    if (!currentUser) return alert("User not loaded");
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    
-    // Background and Border
-    doc.setFillColor(255, 255, 255);
-    doc.rect(0, 0, 210, 297, 'F');
-    doc.setDrawColor(150, 150, 150);
-    doc.setLineWidth(2);
-    doc.rect(10, 10, 190, 277); // Outer border
-    doc.setLineWidth(0.5);
-    doc.rect(15, 15, 180, 267); // Inner border
-    
-    // Header
-    doc.setFontSize(28);
-    doc.setFont("times", "bold");
-    doc.text("Certificate of Achievement", 105, 40, { align: "center" });
-    
-    // Subheader
-    doc.setFontSize(16);
-    doc.setFont("times", "italic");
-    doc.text("This is to certify that", 105, 70, { align: "center" });
-    
-    // Name
-    doc.setFontSize(22);
-    doc.setFont("times", "bold");
-    doc.text(currentUser.name, 105, 90, { align: "center" });
-    
-    // Body
-    doc.setFontSize(14);
-    doc.setFont("times", "normal");
-    doc.text("has successfully completed the exam on Seerat-e-Mustafa", 105, 110, { align: "center" });
-    doc.text(`with a score of ${document.getElementById("resultText").innerText}`, 105, 125, { align: "center" });
-    doc.text("Awarded on: " + new Date().toLocaleDateString(), 105, 140, { align: "center" });
-    
-    // Signature Line
-    doc.line(30, 200, 80, 200);
-    doc.text("Signature", 55, 210, { align: "center" });
-    doc.line(130, 200, 180, 200);
-    doc.text("Authority", 155, 210, { align: "center" });
-    
-    // Footer
-    doc.setFontSize(10);
-    doc.text("Online Exam System - Certified Excellence", 105, 270, { align: "center" });
-    
-    doc.save("Certificate.pdf");
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Certificate border
+        doc.setDrawColor(150, 150, 150);
+        doc.setLineWidth(1);
+        doc.rect(10, 10, 190, 130);
+        
+        // Header
+        doc.setFontSize(24);
+        doc.setTextColor(33, 150, 243);
+        doc.text("CERTIFICATE OF ACHIEVEMENT", 105, 30, { align: 'center' });
+        
+        // Body
+        doc.setFontSize(14);
+        doc.setTextColor(0, 0, 0);
+        doc.text("This is to certify that", 105, 50, { align: 'center' });
+        
+        doc.setFontSize(20);
+        doc.setTextColor(33, 150, 243);
+        doc.text(currentUser.name.toUpperCase(), 105, 65, { align: 'center' });
+        
+        doc.setFontSize(14);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`has successfully completed the "${quizData.title}" exam`, 105, 80, { align: 'center' });
+        doc.text(`with a score of ${result.marks} out of ${result.total}`, 105, 90, { align: 'center' });
+        
+        // Footer
+        doc.setFontSize(12);
+        doc.text(`Roll No: ${currentUser.rollNumber}`, 105, 110, { align: 'center' });
+        doc.text(`Date: ${new Date().toLocaleDateString()}`, 105, 120, { align: 'center' });
+        
+        // Signature
+        doc.setFontSize(10);
+        doc.text("Exam Coordinator", 160, 140);
+        doc.line(160, 142, 190, 142);
+        
+        doc.save(`Certificate_${currentUser.rollNumber}.pdf`);
+    } catch (err) {
+        console.error("Error generating certificate:", err);
+        showMessage("Could not generate certificate. Please try again.", true);
+    }
 }
+
+// Initialize
+showLogin();
 </script>
 
 </body>
