@@ -1,526 +1,1125 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Online Exam System</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<style>
-body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; }
-.container { max-width: 750px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-input, button { padding: 10px; margin: 5px 0; width: 100%; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-button { background: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; }
-button:hover { background: #218838; }
-button:disabled { background: #cccccc; cursor: not-allowed; }
-.hidden { display: none; }
-h2, h3 { color: #333; }
-.error { color: #dc3545; margin: 5px 0; }
-.success { color: #28a745; margin: 5px 0; }
-.loading { text-align: center; padding: 10px; }
-.spinner { border: 4px solid rgba(0,0,0,0.1); width: 36px; height: 36px; border-radius: 50%; border-left-color: #09f; animation: spin 1s linear infinite; margin: 10px auto; }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-.question { margin-bottom: 15px; padding: 10px; background: #f9f9f9; border-radius: 4px; }
-label { display: block; margin: 5px 0; cursor: pointer; }
-input[type="radio"] { width: auto; margin-right: 8px; }
-a { color: #007bff; text-decoration: none; }
-a:hover { text-decoration: underline; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exam System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* Existing CSS remains unchanged, with new styles for results modal */
+    :root {
+      --primary: #4361ee;
+      --primary-dark: #3a56d4;
+      --secondary: #3f37c9;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --success: #4cc9f0;
+      --danger: #f72585;
+      --warning: #f8961e;
+      --info: #4895ef;
+      --border-radius: 12px;
+      --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f5f7ff;
+      color: var(--dark);
+      line-height: 1.6;
+    }
+    
+    header {
+      background: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--box-shadow);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      transform: translateY(-100%);
+      opacity: 0;
+      transition: var(--transition);
+    }
+    
+    header.visible {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+    }
+    
+    .logo i {
+      margin-right: 0.5rem;
+      font-size: 1.8rem;
+    }
+    
+    nav {
+      display: flex;
+      align-items: center;
+    }
+    
+    nav a {
+      margin: 0 1rem;
+      text-decoration: none;
+      color: var(--dark);
+      font-weight: 500;
+      position: relative;
+      padding: 0.5rem 0;
+      transition: var(--transition);
+    }
+    
+    nav a:hover {
+      color: var(--primary);
+    }
+    
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--primary);
+      transition: var(--transition);
+    }
+    
+    nav a:hover::after {
+      width: 100%;
+    }
+    
+    .profile {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+    }
+    
+    .profile:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(67, 97, 238, 0.4);
+    }
+    
+    .container {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-top: 6rem;
+    }
+    
+    .box {
+      background: white;
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      width: 100%;
+      max-width: 400px;
+      margin: 2rem auto;
+      box-shadow: var(--box-shadow);
+      transform: translateY(20px);
+      opacity: 0;
+      transition: var(--transition);
+    }
+    
+    .box.visible {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    .box h2 {
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+      text-align: center;
+      font-weight: 600;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--dark);
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      font-family: 'Poppins', sans-serif;
+      font-size: 1rem;
+      transition: var(--transition);
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    }
+    
+    .btn {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: var(--border-radius);
+      font-family: 'Poppins', sans-serif;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      text-align: center;
+      width: 100%;
+    }
+    
+    .btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+    }
+    
+    .btn-outline {
+      background: transparent;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+    
+    .btn-outline:hover {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .text-center {
+      text-align: center;
+    }
+    
+    .toggle-link {
+      color: var(--primary);
+      cursor: pointer;
+      font-weight: 500;
+      transition: var(--transition);
+      display: inline-block;
+      margin-top: 1rem;
+    }
+    
+    .toggle-link:hover {
+      color: var(--secondary);
+      text-decoration: underline;
+    }
+    
+    /* Home View */
+    #homeView {
+      display: none;
+      opacity: 0;
+      transition: var(--transition);
+    }
+    
+    #homeView.visible {
+      opacity: 1;
+    }
+    
+    .welcome-section {
+      background: white;
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      margin-bottom: 2rem;
+      box-shadow: var(--box-shadow);
+    }
+    
+    .welcome-section h3 {
+      color: var(--primary);
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+    
+    .welcome-section p {
+      color: #666;
+      margin-bottom: 1.5rem;
+    }
+    
+    .card-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    
+    .card {
+      background: white;
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      box-shadow: var(--box-shadow);
+      transition: var(--transition);
+      cursor: pointer;
+      text-align: center;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card i {
+      font-size: 2.5rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+    
+    .card h4 {
+      margin-bottom: 0.5rem;
+      color: var(--dark);
+    }
+    
+    .card p {
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    /* Progress Modal */
+    #progressModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(5px);
+    }
+    
+    .progressBox {
+      background: white;
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      text-align: center;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      transform: scale(0.9);
+      opacity: 0;
+      transition: var(--transition);
+    }
+    
+    .progressBox.visible {
+      transform: scale(1);
+      opacity: 1;
+    }
+    
+    .progressBox h3 {
+      margin-bottom: 1.5rem;
+      color: var(--primary);
+    }
+    
+    .progressBar {
+      width: 100%;
+      background: #f0f0f0;
+      height: 10px;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+    
+    .progressFill {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--primary), var(--success));
+      transition: width 0.3s ease;
+    }
+    
+    .progressText {
+      font-weight: 500;
+      color: var(--dark);
+    }
+    
+    /* Alert */
+    .alert {
+      padding: 1rem;
+      border-radius: var(--border-radius);
+      margin-bottom: 1rem;
+      display: none;
+    }
+    
+    .alert-success {
+      background: rgba(76, 201, 240, 0.2);
+      border-left: 4px solid var(--success);
+      color: #0a6d8c;
+    }
+    
+    /* Results Modal */
+    #resultsModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(5px);
+    }
+    
+    .resultsBox {
+      background: white;
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      width: 100%;
+      max-width: 800px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      transform: scale(0.9);
+      opacity: 0;
+      transition: var(--transition);
+    }
+    
+    .resultsBox.visible {
+      transform: scale(1);
+      opacity: 1;
+    }
+    
+    .resultsBox h2 {
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+      text-align: center;
+      font-weight: 600;
+    }
+    
+    .resultsBox table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1.5rem;
+    }
+    
+    .resultsBox th, .resultsBox td {
+      padding: 0.8rem;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    
+    .resultsBox th {
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+    }
+    
+    .resultsBox td {
+      background: var(--light);
+    }
+    
+    .resultsBox .close-btn {
+      display: block;
+      margin: 0 auto;
+      background: var(--danger);
+      color: white;
+    }
+    
+    .resultsBox .export-btn {
+      display: block;
+      margin: 1rem auto 0;
+      background: var(--success);
+      color: white;
+    }
+    
+    .resultsBox .correct {
+      color: #0a6d8c;
+      font-weight: 500;
+    }
+    
+    .resultsBox .incorrect {
+      color: var(--danger);
+      font-weight: 500;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease forwards;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      header {
+        padding: 1rem;
+      }
+      
+      nav a {
+        margin: 0 0.5rem;
+        font-size: 0.9rem;
+      }
+      
+      .container {
+        padding: 1rem;
+        padding-top: 5rem;
+      }
+      
+      .box {
+        padding: 1.5rem;
+      }
+      
+      .resultsBox {
+        max-width: 95%;
+      }
+      
+      .resultsBox table {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Online Exam System</h2>
+<header id="topBar">
+  <div class="logo">
+    <i class="fas fa-graduation-cap"></i>
+    <span>ExamPro</span>
+  </div>
+  <nav id="navLinks"></nav>
+  <div class="profile" id="profilePic" title="Profile"></div>
+</header>
 
-    <!-- Status Messages -->
-    <div id="statusMessage"></div>
-
-    <!-- Register -->
-    <div id="registerBox">
-        <h3>Create Account</h3>
-        <input type="text" id="name" placeholder="Full Name" required>
-        <input type="text" id="username" placeholder="Username (no spaces)" required>
-        <input type="date" id="dob" required>
-        <button id="registerBtn" onclick="registerUser()">Create Account</button>
-        <p>Already have an account? <a href="#" onclick="showLogin()">Login here</a></p>
+<div class="container" id="mainContent">
+  <!-- Login/Signup Forms -->
+  <div class="box" id="authBox">
+    <h2 id="formTitle">Welcome Back!</h2>
+    <div id="alertBox" class="alert alert-success" style="display: none;"></div>
+    <div id="loginForm">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" class="form-control" placeholder="Enter your username" required>
+      </div>
+      <div class="form-group">
+        <label for="rollNumber">Roll Number</label>
+        <input type="text" id="rollNumber" class="form-control" placeholder="Enter your roll number" required>
+      </div>
+      <button class="btn" onclick="login()">Login</button>
+      <p class="text-center">
+        <span class="toggle-link" onclick="toggle()">Don't have an account? Sign up</span>
+      </p>
     </div>
-
-    <!-- Login -->
-    <div id="loginBox" class="hidden">
-        <h3>Login</h3>
-        <input type="text" id="loginUsername" placeholder="Username" required>
-        <input type="text" id="loginRoll" placeholder="Roll Number" required>
-        <button id="loginBtn" onclick="loginUser()">Login</button>
-        <p>Don't have an account? <a href="#" onclick="showRegister()">Create New</a></p>
+    <div id="signupForm" style="display:none;">
+      <div class="form-group">
+        <label for="name">Full Name</label>
+        <input type="text" id="name" class="form-control" placeholder="Enter your full name" required>
+      </div>
+      <div class="form-group">
+        <label for="newUsername">Username</label>
+        <input type="text" id="newUsername" class="form-control" placeholder="Choose a username" required>
+      </div>
+      <div class="form-group">
+        <label for="dob">Date of Birth</label>
+        <input type="date" id="dob" class="form-control" required>
+      </div>
+      <button class="btn" onclick="signup()">Create Account</button>
+      <p class="text-center">
+        <span class="toggle-link" onclick="toggle()">Already have an account? Login</span>
+      </p>
     </div>
+  </div>
 
-    <!-- Loading Indicator -->
-    <div id="loadingBox" class="hidden">
-        <div class="loading">
-            <div class="spinner"></div>
-            <p>Processing your request...</p>
-        </div>
+  <!-- Home View -->
+  <div id="homeView">
+    <div class="welcome-section">
+      <h3>Welcome back, <span id="userName"></span>!</h3>
+      <p id="examStatusMessage">Ready to take your exam?</p>
+      <div id="examSection"></div>
     </div>
+    
+    <h3 style="margin-bottom: 1rem; color: var(--primary);">Your Resources</h3>
+    <div class="card-container" id="resourceCards">
+      <!-- Cards will be dynamically inserted here -->
+    </div>
+  </div>
 
-    <!-- Exam -->
-    <div id="examBox" class="hidden">
-        <h3 id="examTitle"></h3>
-        <div id="examTime" class="hidden"></div>
-        <form id="examForm"></form>
-        <button id="submitExamBtn" onclick="submitExam()">Submit Exam</button>
+  <!-- Results Modal -->
+  <div id="resultsModal">
+    <div class="resultsBox">
+      <h2 id="resultsTitle"></h2>
+      <div id="resultsContent"></div>
+      <button class="btn close-btn" onclick="closeResultsModal()">Close</button>
+      <button class="btn export-btn" id="exportCsvBtn" style="display: none;" onclick="exportToCsv()">Export as CSV</button>
     </div>
+  </div>
 
-    <!-- Results -->
-    <div id="resultBox" class="hidden">
-        <h3>Your Result</h3>
-        <div id="resultDetails"></div>
-        <button id="certificateBtn" onclick="downloadCertificate()">Download Certificate</button>
-        <button id="restartBtn" onclick="showLogin()">Take Another Test</button>
+  <!-- Progress Modal -->
+  <div id="progressModal">
+    <div class="progressBox">
+      <h3 id="progressTitle">Loading...</h3>
+      <div class="progressBar">
+        <div class="progressFill" id="progressFill"></div>
+      </div>
+      <p class="progressText" id="progressText">0%</p>
     </div>
+  </div>
 </div>
 
 <script>
-// Replace with your deployed Web App URL
-const APP_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
-let currentUser = null;
-let quizData = null;
-const quizId = "hdjsk299e93uee"; // Example quiz id
-let timerInterval = null;
+const API_URL = "https://script.google.com/macros/s/AKfycby9u8GQS-T7rYVJjpJDsxWX1LQbYbktWWReZGVKtPvFS0tKBAhuGN_959rt8SKhNl15-A/exec";
 
-// Helper functions
-function showLoading(show) {
-    document.getElementById("loadingBox").classList.toggle("hidden", !show);
-}
-
-function showMessage(text, isError = false) {
-    const statusEl = document.getElementById("statusMessage");
-    statusEl.innerHTML = `<div class="${isError ? 'error' : 'success'}">${text}</div>`;
-    setTimeout(() => statusEl.innerHTML = '', 5000);
-}
-
-function showRegister() {
-    document.getElementById("registerBox").classList.remove("hidden");
-    document.getElementById("loginBox").classList.add("hidden");
-    document.getElementById("examBox").classList.add("hidden");
-    document.getElementById("resultBox").classList.add("hidden");
-    clearMessage();
-}
-
-function showLogin() {
-    document.getElementById("registerBox").classList.add("hidden");
-    document.getElementById("loginBox").classList.remove("hidden");
-    document.getElementById("examBox").classList.add("hidden");
-    document.getElementById("resultBox").classList.add("hidden");
-    clearMessage();
-    currentUser = null;
-}
-
-function clearMessage() {
-    document.getElementById("statusMessage").innerHTML = '';
-}
-
-// Main functions
-function registerUser() {
-    const name = document.getElementById("name").value.trim();
-    const username = document.getElementById("username").value.trim();
-    const dob = document.getElementById("dob").value;
-    const btn = document.getElementById("registerBtn");
-    
-    if (!name || !username || !dob) {
-        showMessage("All fields are required", true);
-        return;
-    }
-    
-    if (username.includes(" ")) {
-        showMessage("Username must not contain spaces", true);
-        return;
-    }
-    
-    btn.disabled = true;
-    showLoading(true);
-    
-    fetch(APP_URL, {
-        method: "POST",
-        body: JSON.stringify({action:"saveUser", name, username, dob})
-    })
-    .then(r => r.json())
-    .then(res => {
-        if (res.status === "exists") {
-            showMessage("Username already exists! Please choose another.", true);
-        } else if (res.status === "success") {
-            const rollNumber = res.user.rollNumber;
-            showMessage(`Account created successfully! Your Roll Number: ${rollNumber}`);
-            generateAdmitCard(name, username, rollNumber);
-            showLogin();
-            document.getElementById("loginRoll").value = rollNumber;
-        } else {
-            showMessage(res.message || "Registration failed", true);
-        }
-    })
-    .catch(err => {
-        showMessage("Network error. Please try again.", true);
-        console.error(err);
-    })
-    .finally(() => {
-        btn.disabled = false;
-        showLoading(false);
-    });
-}
-
-function loginUser() {
-    const username = document.getElementById("loginUsername").value.trim();
-    const rollNumber = document.getElementById("loginRoll").value.trim();
-    const btn = document.getElementById("loginBtn");
-    
-    if (!username || !rollNumber) {
-        showMessage("Both username and roll number are required", true);
-        return;
-    }
-    
-    btn.disabled = true;
-    showLoading(true);
-    
-    fetch(APP_URL, {
-        method: "POST",
-        body: JSON.stringify({action:"login", username, rollNumber})
-    })
-    .then(r => r.json())
-    .then(res => {
-        if (res.status === "success") {
-            currentUser = res.user;
-            checkAttempt();
-        } else {
-            showMessage("Invalid username or roll number", true);
-        }
-    })
-    .catch(err => {
-        showMessage("Login failed. Please try again.", true);
-        console.error(err);
-    })
-    .finally(() => {
-        btn.disabled = false;
-        showLoading(false);
-    });
-}
-
-function checkAttempt() {
-    showLoading(true);
-    
-    fetch(APP_URL, {
-        method: "POST",
-        body: JSON.stringify({action:"checkAttempt", rollNumber: currentUser.rollNumber, quizId})
-    })
-    .then(r => r.json())
-    .then(res => {
-        if (res.status === "success") {
-            if (res.attempted) {
-                showResults(res.result);
-            } else {
-                loadExam();
-            }
-        } else {
-            showMessage("Error checking attempt status", true);
-        }
-    })
-    .catch(err => {
-        showMessage("Network error. Please try again.", true);
-        console.error(err);
-    })
-    .finally(() => {
-        showLoading(false);
-    });
-}
-
-function loadExam() {
-    showLoading(true);
-    
-    // In a real implementation, you would fetch this from your server
-    // For demo purposes, we'll use sample quiz data
-    const sampleQuiz = {
-        title: "Sample Quiz - Seerat-e-Mustafa",
-        timeLimit: 30, // minutes
-        questions: [
-            {
-                question: "What was the Prophet's (PBUH) father's name?",
-                options: ["Abdullah", "Abu Talib", "Hamza", "Ali"],
-                answer: "Abdullah"
-            },
-            {
-                question: "How old was Prophet Muhammad (PBUH) when he received the first revelation?",
-                options: ["25", "30", "40", "45"],
-                answer: "40"
-            },
-            {
-                question: "Which Surah was revealed first?",
-                options: ["Al-Fatiha", "Al-Baqarah", "Al-Alaq", "Al-Ikhlas"],
-                answer: "Al-Alaq"
-            }
-        ]
-    };
-    
-    // Simulate API call with timeout
+// Initialize the app
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(() => {
+    document.getElementById('authBox').classList.add('visible');
+    document.getElementById('topBar').classList.add('visible');
+  }, 100);
+  
+  const user = JSON.parse(localStorage.getItem("user"));
+  if(user){ 
     setTimeout(() => {
-        quizData = sampleQuiz;
-        renderExam();
-        showLoading(false);
-    }, 1000);
-    
-    // In production, use:
-    // fetch(`quizes/${quizId}.json`)
-    // .then(r => r.json())
-    // .then(data => {
-    //     quizData = data;
-    //     renderExam();
-    //     showLoading(false);
-    // })
-    // .catch(err => {
-    //     showMessage("Failed to load exam. Please try again.", true);
-    //     console.error(err);
-    //     showLoading(false);
-    // });
+      renderHome();
+    }, 300);
+  }
+});
+
+// Toggle Login / Signup
+function toggle(){
+  let loginForm = document.getElementById("loginForm");
+  let signupForm = document.getElementById("signupForm");
+  let title = document.getElementById("formTitle");
+  
+  if(loginForm.style.display === "none"){
+    loginForm.style.display = "block";
+    signupForm.style.display = "none";
+    title.innerText = "Welcome Back!";
+  } else {
+    loginForm.style.display = "none";
+    signupForm.style.display = "block";
+    title.innerText = "Create Account";
+  }
+  
+  document.getElementById("username").value = "";
+  document.getElementById("rollNumber").value = "";
+  document.getElementById("name").value = "";
+  document.getElementById("newUsername").value = "";
+  document.getElementById("dob").value = "";
 }
 
-function renderExam() {
-    document.getElementById("examTitle").innerText = quizData.title;
-    
-    if (quizData.timeLimit) {
-        const timeEl = document.getElementById("examTime");
-        timeEl.classList.remove("hidden");
-        timeEl.innerHTML = `Time remaining: <span id="timer">${quizData.timeLimit}:00</span>`;
-        startTimer(quizData.timeLimit * 60); // Convert to seconds
+// Show alert message
+function showAlert(message, type = 'success') {
+  const alertBox = document.getElementById('alertBox');
+  alertBox.textContent = message;
+  alertBox.className = `alert alert-${type}`;
+  alertBox.style.display = 'block';
+  
+  setTimeout(() => {
+    alertBox.style.display = 'none';
+  }, 5000);
+}
+
+// Login
+function login(){
+  const username = document.getElementById("username").value.trim();
+  const rollNumber = document.getElementById("rollNumber").value.trim();
+  
+  if(!username || !rollNumber) {
+    showAlert('Please fill in all fields', 'danger');
+    return;
+  }
+  
+  showProgress('Authenticating...');
+  
+  fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ 
+      action: "login", 
+      username: username, 
+      rollNumber: rollNumber 
+    })
+  })
+  .then(response => {
+    if(!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  })
+  .then(res => {
+    hideProgress();
+    if(res.success){
+      localStorage.setItem("user", JSON.stringify({ ...res, rollNumber: rollNumber }));
+      showAlert('Login successful! Redirecting...');
+      setTimeout(() => {
+        renderHome();
+      }, 1500);
+    } else {
+      showAlert('Invalid credentials. Please try again.', 'danger');
     }
-    
-    let form = document.getElementById("examForm");
-    form.innerHTML = "";
-    
-    quizData.questions.forEach((q, i) => {
-        const questionEl = document.createElement("div");
-        questionEl.className = "question";
-        questionEl.innerHTML = `<p><strong>Question ${i+1}:</strong> ${q.question}</p>`;
-        
-        q.options.forEach(opt => {
-            questionEl.innerHTML += `
-                <label>
-                    <input type="radio" name="q${i}" value="${opt}" required>
-                    ${opt}
-                </label><br>
-            `;
-        });
-        
-        form.appendChild(questionEl);
-    });
-    
-    document.getElementById("loginBox").classList.add("hidden");
-    document.getElementById("examBox").classList.remove("hidden");
+  })
+  .catch(error => {
+    hideProgress();
+    showAlert('An error occurred. Please try again later.', 'danger');
+    console.error('Error:', error);
+  });
 }
 
-function startTimer(duration) {
-    if (timerInterval) clearInterval(timerInterval);
-    
-    let timer = duration, minutes, seconds;
-    const display = document.getElementById("timer");
-    
-    timerInterval = setInterval(() => {
-        minutes = parseInt(timer / 60, 10);
-        seconds = parseInt(timer % 60, 10);
-        
-        minutes = minutes < 10 ? "0" + minutes : minutes;
-        seconds = seconds < 10 ? "0" + seconds : seconds;
-        
-        display.textContent = minutes + ":" + seconds;
-        
-        if (--timer < 0) {
-            clearInterval(timerInterval);
-            submitExam(); // Auto-submit when time expires
-        }
-    }, 1000);
-}
-
-function submitExam() {
-    if (timerInterval) clearInterval(timerInterval);
-    
-    // Validate all questions are answered
-    const unanswered = [];
-    quizData.questions.forEach((q, i) => {
-        if (!document.querySelector(`input[name="q${i}"]:checked`)) {
-            unanswered.push(i+1);
-        }
-    });
-    
-    if (unanswered.length > 0) {
-        showMessage(`Please answer all questions. Unanswered: ${unanswered.join(", ")}`, true);
-        return;
+// Signup
+function signup(){
+  const name = document.getElementById("name").value.trim();
+  const username = document.getElementById("newUsername").value.trim();
+  const dob = document.getElementById("dob").value;
+  
+  if(!name || !username || !dob) {
+    showAlert('Please fill in all fields', 'danger');
+    return;
+  }
+  
+  showProgress('Creating account...');
+  
+  fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ 
+      action: "signup", 
+      name: name, 
+      username: username, 
+      dob: dob 
+    })
+  })
+  .then(response => {
+    if(!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  })
+  .then(res => {
+    hideProgress();
+    if(res.success){
+      showAlert(`Account created successfully! Your Roll Number is: ${res.rollNumber}`, 'success');
+      document.getElementById("username").value = username;
+      document.getElementById("rollNumber").value = res.rollNumber;
+      toggle();
+    } else {
+      showAlert(res.message || 'Account creation failed. Please try again.', 'danger');
     }
-    
-    // Collect answers
-    let answers = [];
-    let correct = 0;
-    
-    quizData.questions.forEach((q, i) => {
-        const chosen = document.querySelector(`input[name="q${i}"]:checked`);
-        const ans = chosen ? chosen.value : null;
-        const isCorrect = ans === q.answer;
-        
-        answers.push({
-            question: q.question,
-            yourAnswer: ans,
-            correctAnswer: q.answer,
-            isCorrect: isCorrect
-        });
-        
-        if (isCorrect) correct++;
-    });
-    
-    const percentage = Math.round((correct / quizData.questions.length) * 100);
-    const btn = document.getElementById("submitExamBtn");
-    
-    btn.disabled = true;
-    showLoading(true);
-    
-    fetch(APP_URL, {
-        method: "POST",
-        body: JSON.stringify({
-            action: "saveResults",
-            quizId,
-            rollNumber: currentUser.rollNumber,
-            name: currentUser.name,
-            username: currentUser.username,
-            marks: correct,
-            total: quizData.questions.length,
-            percentage,
-            details: answers
-        })
-    })
-    .then(r => r.json())
-    .then(res => {
-        if (res.status === "success") {
-            showResults({
-                marks: correct,
-                total: quizData.questions.length,
-                percentage
-            });
-        } else if (res.status === "blocked") {
-            showMessage("You have already attempted this exam.", true);
-            showLogin();
-        } else {
-            showMessage("Error saving results. Please try again.", true);
-        }
-    })
-    .catch(err => {
-        showMessage("Network error. Results not saved.", true);
-        console.error(err);
-    })
-    .finally(() => {
-        btn.disabled = false;
-        showLoading(false);
-    });
+  })
+  .catch(error => {
+    hideProgress();
+    showAlert('An error occurred. Please try again later.', 'danger');
+    console.error('Error:', error);
+  });
 }
 
-function showResults(result) {
-    document.getElementById("examBox").classList.add("hidden");
-    
-    const resultDetails = document.getElementById("resultDetails");
-    resultDetails.innerHTML = `
-        <p><strong>Name:</strong> ${currentUser.name}</p>
-        <p><strong>Roll No:</strong> ${currentUser.rollNumber}</p>
-        <p><strong>Score:</strong> ${result.marks} out of ${result.total}</p>
-        <p><strong>Percentage:</strong> ${result.percentage}%</p>
-        <p><strong>Status:</strong> ${result.percentage >= 50 ? 'Passed' : 'Failed'}</p>
+// Logout
+function logout(){
+  localStorage.removeItem("user");
+  document.getElementById('homeView').classList.remove('visible');
+  document.getElementById('authBox').style.display = 'block';
+  document.getElementById('loginForm').style.display = 'block';
+  document.getElementById('signupForm').style.display = 'none';
+  document.getElementById('formTitle').innerText = 'Welcome Back!';
+  document.getElementById('topBar').style.display = 'none';
+  
+  setTimeout(() => {
+    document.getElementById('authBox').classList.add('visible');
+    location.reload();
+  }, 300);
+}
+
+// Progress Modal
+function showProgress(title = 'Processing...') {
+  document.getElementById("progressTitle").textContent = title;
+  document.getElementById("progressModal").style.display = "flex";
+  document.getElementById("progressFill").style.width = "0%";
+  document.getElementById("progressText").textContent = "0%";
+  
+  setTimeout(() => {
+    document.querySelector('.progressBox').classList.add('visible');
+  }, 10);
+  
+  let progress = 0;
+  let interval = setInterval(() => {
+    if(progress < 50){
+      progress += 5;
+      document.getElementById("progressFill").style.width = progress + "%";
+      document.getElementById("progressText").textContent = progress + "%";
+    } else {
+      clearInterval(interval);
+    }
+  }, 200);
+}
+
+function hideProgress() {
+  document.getElementById("progressFill").style.width = "100%";
+  document.getElementById("progressText").textContent = "100%";
+  
+  setTimeout(() => {
+    document.querySelector('.progressBox').classList.remove('visible');
+    setTimeout(() => {
+      document.getElementById("progressModal").style.display = "none";
+    }, 300);
+  }, 500);
+}
+
+// Results Modal
+function showResultsModal(title, content, showExport = false) {
+  document.getElementById("resultsTitle").textContent = title;
+  document.getElementById("resultsContent").innerHTML = content;
+  document.getElementById("resultsModal").style.display = "flex";
+  document.getElementById("exportCsvBtn").style.display = showExport ? "block" : "none";
+  
+  setTimeout(() => {
+    document.querySelector('.resultsBox').classList.add('visible');
+  }, 10);
+}
+
+function closeResultsModal() {
+  document.querySelector('.resultsBox').classList.remove('visible');
+  setTimeout(() => {
+    document.getElementById("resultsModal").style.display = "none";
+  }, 300);
+}
+
+// Export to CSV
+function exportToCsv(data, filename) {
+  const csv = data;
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.setAttribute("href", url);
+  link.setAttribute("download", filename);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// Display All Results
+function displayAllResults(){
+  showProgress('Loading All Results...');
+  
+  fetch(API_URL, { 
+    method: "POST", 
+    body: JSON.stringify({ action: "getAllResults" }) 
+  })
+  .then(response => {
+    if(!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  })
+  .then(data => {
+    let table = `
+      <table>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Name</th>
+            <th>Roll No</th>
+            <th>Score</th>
+            <th>Percentage</th>
+          </tr>
+        </thead>
+        <tbody>
     `;
     
-    document.getElementById("resultBox").classList.remove("hidden");
+    data.forEach((row, index) => {
+      table += `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${row.name}</td>
+          <td>${row.rollNumber}</td>
+          <td>${row.marks}/${row.totalMarks}</td>
+          <td>${Math.round((row.marks / row.totalMarks) * 100)}%</td>
+        </tr>
+      `;
+    });
+    
+    table += '</tbody></table>';
+    
+    // Prepare CSV data
+    let csv = 'Rank,Name,Roll No,Score,Percentage\n';
+    data.forEach((row, index) => {
+      csv += `${index + 1},${row.name},${row.rollNumber},${row.marks}/${row.totalMarks},${Math.round((row.marks / row.totalMarks) * 100)}%\n`;
+    });
+    
+    hideProgress();
+    showResultsModal(
+      `ExamPro - All Results (Generated on: ${new Date().toLocaleDateString()})`,
+      table,
+      true
+    );
+    
+    // Store CSV data for export
+    document.getElementById("exportCsvBtn").onclick = () => exportToCsv(csv, "ExamPro_All_Results.csv");
+  })
+  .catch(error => {
+    hideProgress();
+    showAlert('Failed to load results. Please try again.', 'danger');
+    console.error('Error:', error);
+  });
 }
 
-function generateAdmitCard(name, username, roll) {
-    try {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        
-        doc.setFontSize(18);
-        doc.text("ADMIT CARD", 105, 20, { align: 'center' });
-        
-        // Add some styling
-        doc.setDrawColor(0);
-        doc.setLineWidth(0.5);
-        doc.line(20, 25, 190, 25);
-        
-        doc.setFontSize(14);
-        doc.text("Online Exam System", 105, 35, { align: 'center' });
-        
-        // Add photo placeholder
-        doc.rect(140, 45, 50, 60);
-        doc.text("Photo", 165, 80, { align: 'center' });
-        
-        // Student details
-        doc.setFontSize(12);
-        doc.text("Student Details:", 20, 45);
-        doc.text(`Name: ${name}`, 20, 55);
-        doc.text(`Username: ${username}`, 20, 65);
-        doc.text(`Roll Number: ${roll}`, 20, 75);
-        doc.text(`Exam: Seerat-e-Mustafa`, 20, 85);
-        doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 95);
-        
-        // Instructions
-        doc.setFontSize(10);
-        doc.text("Instructions:", 20, 110);
-        doc.text("1. Bring this admit card to the exam center", 20, 120);
-        doc.text("2. Arrive at least 30 minutes before exam time", 20, 130);
-        doc.text("3. No electronic devices allowed", 20, 140);
-        
-        doc.save(`AdmitCard_${roll}.pdf`);
-    } catch (err) {
-        console.error("Error generating admit card:", err);
-        showMessage("Could not generate admit card. Please try again.", true);
+// Display My Detailed Results
+function displayMyResults(){
+  showProgress('Loading Your Detailed Results...');
+  const user = JSON.parse(localStorage.getItem("user"));
+  
+  if (!user || !user.rollNumber) {
+    hideProgress();
+    showAlert('User not logged in. Please log in again.', 'danger');
+    return;
+  }
+  
+  fetch(API_URL, { 
+    method: "POST", 
+    body: JSON.stringify({ 
+      action: "getMyResults", 
+      rollNumber: user.rollNumber 
+    }) 
+  })
+  .then(response => {
+    if(!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  })
+  .then(data => {
+    let totalQuestions = data.length;
+    let correctAnswers = data.filter(q => q.answer === q.correctAnswer).length;
+    let scorePercentage = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+    
+    let content = `
+      <p><strong>Total Questions:</strong> ${totalQuestions}</p>
+      <p><strong>Correct Answers:</strong> ${correctAnswers}</p>
+      <p><strong>Score:</strong> ${scorePercentage}%</p>
+      <h3 style="margin: 1rem 0; color: var(--primary);">Detailed Results:</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Question</th>
+            <th>Your Answer</th>
+            <th>Correct Answer</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+    
+    data.forEach((q, i) => {
+      content += `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${q.question}</td>
+          <td class="${q.answer === q.correctAnswer ? 'correct' : 'incorrect'}">${q.answer}</td>
+          <td class="correct">${q.correctAnswer}</td>
+        </tr>
+      `;
+    });
+    
+    content += '</tbody></table>';
+    
+    // Prepare CSV data
+    let csv = 'Question Number,Question,Your Answer,Correct Answer\n';
+    data.forEach((q, i) => {
+      csv += `${i + 1},"${q.question.replace(/"/g, '""')}","${q.answer.replace(/"/g, '""')}","${q.correctAnswer.replace(/"/g, '""')}"\n`;
+    });
+    
+    hideProgress();
+    showResultsModal(
+      `${user.name}'s Exam Results (Roll Number: ${user.rollNumber})`,
+      content,
+      true
+    );
+    
+    document.getElementById("exportCsvBtn").onclick = () => exportToCsv(csv, `ExamPro_${user.name}_Detailed_Results.csv`);
+  })
+  .catch(error => {
+    hideProgress();
+    showAlert('Failed to load results. Please try again.', 'danger');
+    console.error('Error:', error);
+  });
+}
+
+// Display Certificate
+function displayCertificate(){
+  showProgress('Loading Your Certificate...');
+  const user = JSON.parse(localStorage.getItem("user"));
+  
+  if (!user || !user.rollNumber) {
+    hideProgress();
+    showAlert('User not logged in. Please log in again.', 'danger');
+    return;
+  }
+  
+  fetch(API_URL, { 
+    method: "POST", 
+    body: JSON.stringify({ 
+      action: "getUserScore", 
+      rollNumber: user.rollNumber 
+    }) 
+  })
+  .then(response => {
+    if(!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  })
+  .then(res => {
+    let content = `
+      <div style="text-align: center;">
+        <h3 style="font-size: 1.5rem; color: var(--primary); margin-bottom: 1rem;">CERTIFICATE OF ACHIEVEMENT</h3>
+        <p style="font-size: 1rem; margin-bottom: 1rem;">This Certificate is Proudly Presented to</p>
+        <h2 style="font-size: 1.8rem; font-weight: bold; margin-bottom: 1rem;">${user.name.toUpperCase()}</h2>
+        <p style="font-size: 1rem; margin-bottom: 1rem;">For successfully completing the examination with a score of ${res.marks}/${res.totalMarks}</p>
+        <p style="font-size: 1rem; margin-bottom: 1rem;">Date: ${new Date().toLocaleDateString()}</p>
+        <div style="margin: 1.5rem auto; width: 100px; height: 100px; background: #f0f0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+          <div>
+            <p style="color: var(--primary); font-weight: bold;">ExamPro</p>
+            <p style="font-size: 0.8rem;">Official Seal</p>
+          </div>
+        </div>
+        <p style="font-size: 0.8rem; color: #666;">© ExamPro - All rights reserved</p>
+      </div>
+    `;
+    
+    hideProgress();
+    showResultsModal("Certificate of Achievement", content);
+  })
+  .catch(error => {
+    hideProgress();
+    showAlert('Failed to load certificate. Please try again.', 'danger');
+    console.error('Error:', error);
+  });
+}
+
+// Render Home
+function renderHome(){
+  const user = JSON.parse(localStorage.getItem("user"));
+  if(!user) {
+    showAlert('No user data found. Please log in.', 'danger');
+    return;
+  }
+  
+  document.getElementById('authBox').classList.remove('visible');
+  setTimeout(() => {
+    document.getElementById('authBox').style.display = 'none';
+    document.getElementById('homeView').style.display = 'block';
+    setTimeout(() => {
+      document.getElementById('homeView').classList.add('visible');
+    }, 50);
+  }, 300);
+  
+  document.getElementById("topBar").style.display = "flex";
+  document.getElementById("userName").textContent = user.name;
+  document.getElementById("profilePic").textContent = user.name.charAt(0).toUpperCase();
+
+  fetch(API_URL, { 
+    method: "POST", 
+    body: JSON.stringify({ 
+      action: "checkAttempt", 
+      rollNumber: user.rollNumber 
+    }) 
+  })
+  .then(response => {
+    if(!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  })
+  .then(res => {
+    let nav = document.getElementById("navLinks");
+    let examSection = document.getElementById("examSection");
+    let resourceCards = document.getElementById("resourceCards");
+    let examStatusMessage = document.getElementById("examStatusMessage");
+    
+    if(res.attempted){
+      nav.innerHTML = `
+        <a onclick="displayAllResults()"><i class="fas fa-list-alt"></i> Results</a>
+        <a onclick="displayMyResults()"><i class="fas fa-file-alt"></i> My Results</a>
+        <a onclick="displayCertificate()"><i class="fas fa-award"></i> Certificate</a>
+        <a onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+      `;
+      
+      examStatusMessage.textContent = "You have completed your exam. View your results below.";
+      examSection.innerHTML = `
+        <div style="text-align: center; margin-top: 2rem;">
+          <p style="color: #666; margin-bottom: 1rem;">Exam completed on ${new Date(res.timestamp).toLocaleDateString()}</p>
+          <button class="btn" onclick="displayMyResults()">
+            <i class="fas fa-eye"></i> View Detailed Results
+          </button>
+        </div>
+      `;
+      
+      resourceCards.innerHTML = `
+        <div class="card" onclick="displayAllResults()">
+          <i class="fas fa-list-ol"></i>
+          <h4>All Results</h4>
+          <p>View complete results of all students</p>
+        </div>
+        <div class="card" onclick="displayMyResults()">
+          <i class="fas fa-file-alt"></i>
+          <h4>My Detailed Results</h4>
+          <p>View your answers and correct solutions</p>
+        </div>
+        <div class="card" onclick="displayCertificate()">
+          <i class="fas fa-award"></i>
+          <h4>Certificate</h4>
+          <p>View your achievement certificate</p>
+        </div>
+      `;
+    } else {
+      nav.innerHTML = `
+        <a onclick="displayAllResults()"><i class="fas fa-list-alt"></i> Results</a>
+        <a onclick="window.location.href='exam.html'"><i class="fas fa-pen"></i> Attempt Test</a>
+        <a onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+      `;
+      
+      examStatusMessage.textContent = "You have not attempted the exam yet. Click below to start.";
+      examSection.innerHTML = `
+        <div style="text-align: center; margin-top: 2rem;">
+          <button class="btn" onclick="location.href='exam.html'">
+            <i class="fas fa-play"></i> Start Exam
+          </button>
+        </div>
+      `;
+      
+      resourceCards.innerHTML = `
+        <div class="card" onclick="displayAllResults()">
+          <i class="fas fa-list-ol"></i>
+          <h4>All Results</h4>
+          <p>View results of all students</p>
+        </div>
+        <div class="card" onclick="window.location.href='exam.html'">
+          <i class="fas fa-pen"></i>
+          <h4>Take Exam</h4>
+          <p>Start your examination</p>
+        </div>
+        <div class="card" onclick="logout()">
+          <i class="fas fa-sign-out-alt"></i>
+          <h4>Sign Out</h4>
+          <p>Logout from your account</p>
+        </div>
+      `;
     }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    showAlert('Failed to load exam data. Please try again.', 'danger');
+  });
 }
-
-function downloadCertificate() {
-    try {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        
-        // Certificate border
-        doc.setDrawColor(150, 150, 150);
-        doc.setLineWidth(1);
-        doc.rect(10, 10, 190, 130);
-        
-        // Header
-        doc.setFontSize(24);
-        doc.setTextColor(33, 150, 243);
-        doc.text("CERTIFICATE OF ACHIEVEMENT", 105, 30, { align: 'center' });
-        
-        // Body
-        doc.setFontSize(14);
-        doc.setTextColor(0, 0, 0);
-        doc.text("This is to certify that", 105, 50, { align: 'center' });
-        
-        doc.setFontSize(20);
-        doc.setTextColor(33, 150, 243);
-        doc.text(currentUser.name.toUpperCase(), 105, 65, { align: 'center' });
-        
-        doc.setFontSize(14);
-        doc.setTextColor(0, 0, 0);
-        doc.text(`has successfully completed the "${quizData.title}" exam`, 105, 80, { align: 'center' });
-        doc.text(`with a score of ${result.marks} out of ${result.total}`, 105, 90, { align: 'center' });
-        
-        // Footer
-        doc.setFontSize(12);
-        doc.text(`Roll No: ${currentUser.rollNumber}`, 105, 110, { align: 'center' });
-        doc.text(`Date: ${new Date().toLocaleDateString()}`, 105, 120, { align: 'center' });
-        
-        // Signature
-        doc.setFontSize(10);
-        doc.text("Exam Coordinator", 160, 140);
-        doc.line(160, 142, 190, 142);
-        
-        doc.save(`Certificate_${currentUser.rollNumber}.pdf`);
-    } catch (err) {
-        console.error("Error generating certificate:", err);
-        showMessage("Could not generate certificate. Please try again.", true);
-    }
-}
-
-// Initialize
-showLogin();
 </script>
-
 </body>
 </html>
